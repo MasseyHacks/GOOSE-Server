@@ -1,0 +1,23 @@
+{
+  "name": "goose-server",
+  "version": "1.0.0",
+  "description": "",
+  "main": "app.js",
+  "scripts": {
+    "start": "node app.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/MasseyHacks/GOOSE-Server.git"
+  },
+  "author": "MasseyHacks",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/MasseyHacks/GOOSE-Server/issues"
+  },
+  "homepage": "https://github.com/MasseyHacks/GOOSE-Server#readme",
+  "dependencies": {
+    "express": "^4.17.1"
+  }
+}
