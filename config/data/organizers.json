@@ -1,0 +1,14 @@
+{
+  "david": {
+    "email": "david@masseyhacks.ca",
+    "firstName": "David",
+    "lastName": "Hui",
+    "permission": "developer"
+  },
+  "james": {
+    "email": "james@masseyhacks.ca",
+    "firstName": "James",
+    "lastName": "Xu",
+    "permission": "developer"
+  }
+}

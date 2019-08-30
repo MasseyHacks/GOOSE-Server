@@ -1,0 +1,8 @@
+{
+  "example" : {
+    "email": "example@example.com",
+    "firstName" : "Example",
+    "lastName" : "Organizer",
+    "permission": "developer"
+  }
+}
