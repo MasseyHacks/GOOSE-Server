@@ -1,9 +1,52 @@
 const LogEvent        = require('../models/LogEvent');
-const axios         = require('axios');
-const { loggers } = require('winston');
+const axios           = require('axios');
+const winston         = require('winston');
+const {LoggingWinston}= require('@google-cloud/logging-winston');
+
 //const Raven           = require('raven');
-const logger = loggers.get('default');
+function createWinstonLogger() {
+    const levels = {
+        error: 0,
+        warn: 1,
+        info: 2,
+        verbose: 3,
+        debug: 4,
+        silly: 5
+    };
+    const loggingWinston = new LoggingWinston();
+    const logger = winston.createLogger({
+        level: 'info',
+        format: winston.format.combine(winston.format.timestamp(), winston.format.json()),
+        defaultMeta: { service: 'user-service' },
+        transports: [
+            //
+            // - Write to all logs with level `info` and below to `combined.log`
+            // - Write all logs error (and below) to `error.log`.
+            //
+            new winston.transports.File({ filename: 'error.log' , level:'error'}),
+            new winston.transports.File({ filename: 'combined.log' }),
+            loggingWinston
+        ],
+        exceptionHandlers: [
+            new winston.transports.File({ filename: 'exceptions.log' }),
+            loggingWinston
+        ]
+    });
+    winston.loggers.add('default', logger);
+    //
+    // If we're not in production then log to the `console` with the format:
+    // `${info.level}: ${info.message} JSON.stringify({ ...rest }) `
+    //
+    if (process.env.NODE_ENV !== 'production') {
+        logger.add(new winston.transports.Console({
+            format: winston.format.simple()
+        }));
+    }
+    return logger;
+}
+
 module.exports = {
+    defaultLogger: createWinstonLogger(),
     defaultResponse : function(req, res, responseJSON = true){
         return function(err, data){
 
@@ -21,7 +64,7 @@ module.exports = {
                                 '\nError:\n' +
                                 JSON.stringify(err, null, 2) +
                                 '``` \n';
-
+                    this.defaultLogger.alert(data.replace('\n', ' '));
                     /*if (process.env.SERVER_RAVEN_KEY && (!err.code || err.code >= 500)) {
                         Raven.captureMessage(data, {
                             level: 'error'
@@ -60,11 +103,8 @@ module.exports = {
         };
     },
     logAction : function (actionFrom, actionTo, message, detailedMessage, cb) {
-
         // Start bash
-
-        console.log(actionFrom, actionTo, message, detailedMessage);
-        logger.verbose(`timestamp: ${Date.now()}, idTo: ${actionTo}, idFrom: ${actionFrom}, message: ${message}, detailedMessage: ${detailedMessage}`)
+        this.defaultLogger.info(`timestamp: ${Date.now()}, idTo: ${actionTo}, idFrom: ${actionFrom}, message: ${message}, detailedMessage: ${detailedMessage}`);
         LogEvent
             .create({
                 'to.ID': actionTo,
