@@ -48,18 +48,19 @@ function createWinstonLogger() {
 }
 
 async function getLogActor(id) {
-    if (id !== -1) {
+    if (id === -1) {
+        return {
+            _id: -1,
+            email: 'internal@masseyhacks.ca',
+            name: 'MasseyHacks Internal Authority'
+        }
+    } else {
+
         const doc = await User.findById(id);
         return {
             _id: id.toString(),
             email: doc.email,
             name: doc.fullName
-        }
-    } else {
-        return {
-            _id: -1,
-            email: 'internal@masseyhacks.ca',
-            name: 'MasseyHacks Internal Authority'
         }
     }
 }
