@@ -48,14 +48,14 @@ function createWinstonLogger() {
 }
 
 async function getLogActor(id) {
-    try {
+    if (id !== -1) {
         const doc = await User.findById(id);
         return {
             _id: id.toString(),
             email: doc.email,
             name: doc.fullName
         }
-    } catch (e) {
+    } else {
         return {
             _id: -1,
             email: 'internal@masseyhacks.ca',
