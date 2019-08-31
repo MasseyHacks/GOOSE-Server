@@ -128,8 +128,8 @@ module.exports = {
         let toData = getLogActor(actionTo);
         fromData = await fromData;
         toData = await toData;
-        console.log("fromData: " + JSON.stringify(fromData));
-        console.log("toData: " + JSON.stringify(toData));
+        this.defaultLogger.debug("fromData: " + JSON.stringify(fromData));
+        this.defaultLogger.debug("toData: " + JSON.stringify(toData));
 
         this.defaultLogger.info(`From: ${fromData['email']}, To: ${toData['email']}, message: ${message}`, {
             details: {

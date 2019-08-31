@@ -45,7 +45,7 @@ stats.startService();
 // })
 //
 // function logRequests(req, res, next) {
-//     requestLogger.debug(`${req.url} endpoint hit`, {
+//     requestLogger.verbose(`${req.url} endpoint hit`, {
 //         httpRequest: {
 //             status: res.statusCode,
 //             requestUrl: req.url,
