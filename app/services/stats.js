@@ -1,7 +1,6 @@
 const async    = require('async');
 const User     = require('../models/User');
 const Settings = require('../models/Settings');
-const Sheets   = require('./sheets');
 const fs       = require('fs');
 
 // In memory stats.
