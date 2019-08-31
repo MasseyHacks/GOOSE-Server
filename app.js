@@ -2,6 +2,7 @@ require('dotenv').config();
 const express = require('express');
 
 const app = express();
+const cors = require('cors');
 
 const mongoose        = require('mongoose');
 const port            = process.env.PORT || 3005;
@@ -10,6 +11,9 @@ const database        = process.env.DATABASE || 'mongodb://localhost:27017/goose
 // Start configuration
 const organizers      = require('./config/organizers');
 const settings        = require('./config/settings');
+
+// Start services
+const stats           = require('./app/services/stats');
 
 const Waiver          = require('./app/models/GridStore');
 
@@ -26,6 +30,10 @@ mongoose.connect(database,
         console.log("DB CONNECTION ERROR");
         console.log(error)
     });
+
+stats.startService();
+
+app.use(cors());
 
 let githubRouter = express.Router();
 require('./app/routes/github')(githubRouter);
