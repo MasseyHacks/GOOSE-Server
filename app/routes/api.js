@@ -175,23 +175,23 @@ module.exports = function(router) {
     // Admin
     // Data varies depending on permission
     // Get all teams
-    router.get('/teams', permissions.isAdmin, function(req, res) {
-        var query  = req.query;
+    router.post('/teams', permissions.isAdmin, function(req, res) {
+        var query  = req.body;
         TeamController.getByQuery(req.userExecute, query, logger.defaultResponse(req, res));
     });
 
     // Checkin
     // Data varies depending on permission
     // Get all users
-    router.get('/users', permissions.isCheckin, function(req, res) {
-        var query  = req.query;
+    router.post('/users', permissions.isCheckin, function(req, res) {
+        var query  = req.body;
         UserController.getByQuery(req.userExecute, query, logger.defaultResponse(req, res));
     });
 
     // Developer
     // View system log
-    router.get('/systemLog', permissions.isDeveloper, function (req, res) {
-        var query  = req.query;
+    router.post('/systemLog', permissions.isDeveloper, function (req, res) {
+        var query  = req.body;
         SettingsController.getLog(query, logger.defaultResponse(req, res));
     });
 
