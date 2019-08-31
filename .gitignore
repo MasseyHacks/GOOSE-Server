@@ -1,2 +1,6 @@
 node_modules
 .env
+error.log
+combined.log
+googlecloud.json
+exceptions.log

@@ -60,9 +60,7 @@ module.exports = function(router) {
     router.post('/login', function (req, res) {
         var email = req.body.email;
         var password = req.body.password;
-
         console.log(req.body.email + ' attempting to login.');
-
         UserController.loginWithPassword(email, password, function (err, user, token) {
 
             if (err || !user) {

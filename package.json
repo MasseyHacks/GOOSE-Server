@@ -18,6 +18,7 @@
   },
   "homepage": "https://github.com/MasseyHacks/GOOSE-Server#readme",
   "dependencies": {
+    "@google-cloud/logging-winston": "^2.0.1",
     "algebra.js": "^0.2.6",
     "axios": "^0.19.0",
     "bcrypt": "^3.0.6",
@@ -32,6 +33,7 @@
     "mongoose": "^5.6.11",
     "nodemailer": "^6.3.0",
     "uuid": "^3.3.3",
-    "validator": "^11.1.0"
+    "validator": "^11.1.0",
+    "winston": "^3.2.1"
   }
 }

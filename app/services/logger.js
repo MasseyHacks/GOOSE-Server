@@ -1,10 +1,12 @@
 const LogEvent        = require('../models/LogEvent');
 const axios         = require('axios');
+const { loggers } = require('winston');
 //const Raven           = require('raven');
-
+const logger = loggers.get('default');
 module.exports = {
     defaultResponse : function(req, res, responseJSON = true){
         return function(err, data){
+
             if (err){
                 // Only send error to slack if in production
                 // Keep everyone happy
@@ -62,7 +64,7 @@ module.exports = {
         // Start bash
 
         console.log(actionFrom, actionTo, message, detailedMessage);
-
+        logger.verbose(`timestamp: ${Date.now()}, idTo: ${actionTo}, idFrom: ${actionFrom}, message: ${message}, detailedMessage: ${detailedMessage}`)
         LogEvent
             .create({
                 'to.ID': actionTo,
