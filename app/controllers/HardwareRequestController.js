@@ -9,6 +9,7 @@ HardwareRequestController.submit = function (userID, hardwareID, quantity, callb
     Promise.all([User.findById(userID), Hardware.findById(hardwareID)]).then(result => {
         let [user, hardware] = result;
         if (user && hardware && quantity > 0) {
+            if (user.permissionLevel)
             HardwareRequest.create({
                 originUser: userID,
                 hardwareID: hardwareID,

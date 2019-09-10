@@ -2,7 +2,7 @@ const LogEvent        = require('../models/LogEvent');
 const axios           = require('axios');
 const winston         = require('winston');
 const {LoggingWinston}= require('@google-cloud/logging-winston');
-const User            = require('../models/User')
+const User            = require('../models/User');
 
 //const Raven           = require('raven');
 function createWinstonLogger() {
@@ -55,13 +55,17 @@ async function getLogActor(id) {
             name: 'MasseyHacks Internal Authority'
         }
     } else {
-
-        const doc = await User.findById(id);
-        return {
-            _id: id.toString(),
-            email: doc.email,
-            name: doc.fullName
+        try {
+            const doc = await User.findById(id);
+            return {
+                _id: id.toString(),
+                email: doc.email,
+                name: doc.fullName
+            }
+        } catch (e) {
+            return null
         }
+
     }
 }
 
@@ -129,6 +133,23 @@ module.exports = {
         let toData = getLogActor(actionTo);
         fromData = await fromData;
         toData = await toData;
+        if (!fromData || !toData) {
+            if (cb) {
+                return cb("Logging failed")
+            }
+            if (!fromData) {
+                fromData = {
+                    email: 'Not found',
+                    error: `User ${actionFrom} not found`
+                }
+            }
+            if (!toData) {
+                toData = {
+                    email: 'Not found',
+                    error: `User ${actionFrom} not found`
+                }
+            }
+        }
         this.defaultLogger.debug("fromData: " + JSON.stringify(fromData));
         this.defaultLogger.debug("toData: " + JSON.stringify(toData));
 
