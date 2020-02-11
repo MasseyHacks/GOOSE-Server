@@ -30,9 +30,9 @@ mongoose.connect(database,
         Waiver.init(mongoose.connection.db)
     })
     .catch(error => {
-        // console.log("DB CONNECTION ERROR");
+        // logger.logToConsole("DB CONNECTION ERROR");
         logger.defaultLogger.error(error);
-        // console.log(error)
+        // logger.logToConsole(error)
     });
 
 stats.startService();
@@ -73,6 +73,6 @@ require('./app/routes/auth')(authRouter);
 app.use('/auth', authRouter);
 
 app.listen(port, () => {
-    // console.log(`listening on port ${port}`);
+    // logger.logToConsole(`listening on port ${port}`);
     logger.defaultLogger.info(`listening on port ${port}`)
 });

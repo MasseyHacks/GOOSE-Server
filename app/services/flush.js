@@ -2,18 +2,19 @@ require('dotenv').config();
 
 const Settings   = require('../models/Settings');
 const User       = require('../models/User');
-const mailer     = require('./email')
+const mailer     = require('./email');
+const logger     = require('../services/logger');
 var date         = new Date();
 
 module.exports = {
     flushQueue : function(queue,callback){
         queue = queue.toLowerCase();
 
-        console.log('Attempting queue flush');
+        logger.logToConsole('Attempting queue flush');
 
         //check if the given queue is valid
         if(!queue || validTemplates[queue]['queueName'] === null || !validTemplates[queue]['canQueue']){//invalid
-            console.log('Invalid email queue!');
+            logger.logToConsole('Invalid email queue!');
             return callback({error: 'Invalid email queue.'});
         }
         else{//valid
@@ -23,7 +24,7 @@ module.exports = {
                     return callback({error: 'Cannot find the email queue.'});
                 }
                 else {
-                    console.log('Flushing Queue...', settings.emailQueue[validTemplates[queue]['queueName']]);//debug
+                    logger.logToConsole('Flushing Queue...', settings.emailQueue[validTemplates[queue]['queueName']]);//debug
 
                     //get pending emails from database
                     var emailPendingList = settings.emailQueue[validTemplates[queue]['queueName']];
@@ -61,11 +62,11 @@ module.exports = {
                                 var dataPack = {
                                     nickname: user['firstName'],
                                     confirmBy: confirmByString,
-                                    dashUrl: process.env.ROOT_URL,
+                                    dashUrl: process.env.FRONTEND_URL,
                                     submitBy: submitByString
                                 };
 
-                                console.log(dataPack.dashURL);
+                                logger.logToConsole(dataPack.dashURL);
 
                                 //send the email
                                 mailer.sendTemplateEmail(element, queue, dataPack,emailHTML);
@@ -75,14 +76,14 @@ module.exports = {
                                 pullObj['emailQueue.'+validTemplates[queue]['queueName']] = element;
                                 //remove it from the queue
 
-                                console.log(pullObj);
+                                logger.logToConsole(pullObj);
 
                                 Settings.findOneAndUpdate({}, {
                                     $pull : pullObj
                                 }, {
 
                                 }, function(err, settings) {
-                                    console.log(err, settings.emailQueue);
+                                    logger.logToConsole(err, settings.emailQueue);
                                 });
 
                             }
@@ -100,7 +101,7 @@ module.exports = {
 						$set: pushObj
 					}, {}, function(err, settings){
 						if(err){
-							console.log(err);
+							logger.logToConsole(err);
 						}
 					});
 
@@ -114,7 +115,7 @@ module.exports = {
 
     flushQueueUser : function(userEmail,callback){
 
-        console.log('Attempting user queue flush');
+        logger.logToConsole('Attempting user queue flush');
 
         Settings.findOne({},function(err,settings){
             if(err){
@@ -147,16 +148,16 @@ module.exports = {
                     var dataPack = {
                         nickname: user['firstName'],
                         confirmBy: confirmByString,
-                        dashUrl: process.env.ROOT_URL,
+                        dashUrl: process.env.FRONTEND_URL,
                         submitBy: submitByString
                     };
                     for (var emailQueueName in settings.emailQueue) {
                         if (typeof settings.emailQueue[emailQueueName] === 'object') {
-                            //console.log(typeof settings.emailQueue[emailQueueName]);
+                            //logger.logToConsole(typeof settings.emailQueue[emailQueueName]);
                             for (var i = 0; i < settings.emailQueue[emailQueueName].length; i++) {
 
                                 if (settings.emailQueue[emailQueueName][i] === userEmail) {
-                                    console.log(emailQueueName + ' ' + settings.emailQueue[emailQueueName][i]);
+                                    logger.logToConsole(emailQueueName + ' ' + settings.emailQueue[emailQueueName][i]);
                                     //mailer
                                     mailer.sendTemplateEmail(userEmail, emailQueueName.toLowerCase(), dataPack);
 
@@ -174,7 +175,7 @@ module.exports = {
                                         $pull: pullObj,
 										$set: pushObj
                                     }, {}, function (err, settings) {
-                                        console.log(err, settings.emailQueue);
+                                        logger.logToConsole(err, settings.emailQueue);
 
                                         User.findOneAndUpdate({
                                                 email: userEmail
@@ -185,7 +186,7 @@ module.exports = {
                                             }, {},
                                             function (err, user) {
 
-                                                console.log(err, user);
+                                                logger.logToConsole(err, user);
 
 
                                             });

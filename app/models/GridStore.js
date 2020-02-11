@@ -3,6 +3,7 @@ require('dotenv').config();
 const fs              = require('fs');
 const jwt             = require('jsonwebtoken');
 var gridfs            = require('gridfs-stream');
+const logger          = require('../services/logger');
 
 JWT_SECRET = process.env.JWT_SECRET;
 var gfs;
@@ -27,7 +28,7 @@ module.exports = {
             fs.createReadStream(path).pipe(writestream);
 
             writestream.on('close', (file) => {
-                console.log('Stored File: ' + file.filename);
+                logger.logToConsole('Stored File: ' + file.filename);
                 return callback(null)
             });
 
@@ -72,7 +73,7 @@ module.exports = {
             else {
 
                 gfs.files.findOne({filename: payload.filename}, (err, file) => {
-                    console.log(err, file)
+                    logger.logToConsole(err, file)
 
                     if (err || !file) {
                         res.status(404).send('File Not Found');

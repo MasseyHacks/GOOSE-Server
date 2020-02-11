@@ -1,5 +1,6 @@
 const Settings = require('../app/models/Settings');
 const fs       = require('fs');
+const logger   = require('../app/services/logger');
 
 // Check if settings exists
 // If not, create new object
@@ -15,7 +16,7 @@ Settings.findOne({}, function(err, settings){
             }, function(err) {
                 if (err) throw err;
 
-                console.log('Settings created.');
+                logger.logToConsole('Settings created.');
             });
         });
     }

@@ -9,13 +9,12 @@ require('dotenv').config();
 describe('Database and Mongoose Tests', function () {
     describe("Initial Connection", function () {
         it('should connect successfully', function (done) {
-            mongoose.connect('mongodb://localhost:27017/gooseTest', {
-                auto_reconnect: true,
+            mongoose.connect(`${process.env.db}/gooseTest`, {
                 useNewUrlParser: true,
                 useFindAndModify: false,
                 useCreateIndex: true
             }).then(() => {
-                // console.log("DONNEEEEE");
+                // logger.logToConsole("DONNEEEEE");
                 done()
             }).catch(error => {
                 // assert.strictEqual(error, null);
@@ -33,27 +32,27 @@ describe('Database and Mongoose Tests', function () {
         })
     });
 
-//     describe('Users', function () {
-//         describe('Creating a user', function () {
-//             it('should create a user successfully', function (done) {
-//                 UserController.createUser('tester@masseyhacks.ca', 'Test', 'User', 'test123', function (error) {
-//                     done(error);
-//                 })
-//             });
-//         });
-//         describe('Remove user', function () {
-//             it('should delete the created user using its email', function (done) {
-//                 User.getByEmail('tester@masseyhacks.ca', function (error, user) {
-//                     if (!error) {
-//                         user.remove();
-//                         done();
-//                     } else {
-//                         done(error);
-//                     }
-//                 })
-//             })
-//         })
-//     });
+    describe('Users', function () {
+        describe('Creating a user', function () {
+            it('should create a user successfully', function (done) {
+                UserController.createUser('tester@masseyhacks.ca', 'Test', 'User', 'test123', function (error) {
+                    done(error);
+                })
+            });
+        });
+        describe('Remove user', function () {
+            it('should delete the created user using its email', function (done) {
+                User.getByEmail('tester@masseyhacks.ca', function (error, user) {
+                    if (!error) {
+                        user.remove();
+                        done();
+                    } else {
+                        done(error);
+                    }
+                })
+            })
+        })
+    });
     describe('Hardware system', function () {
 
     });

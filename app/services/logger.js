@@ -77,6 +77,7 @@ module.exports = {
             if (err){
                 // Only send error to slack if in production
                 // Keep everyone happy
+                console.log('ERROR defaultResponse', err);
                 if (process.env.NODE_ENV === 'production'){
 
                     let data =  'Request: ' + req.method + ' ' + req.url + '\n' +
@@ -96,7 +97,7 @@ module.exports = {
                     }*/
 
                     if (process.env.ERROR_SLACK_HOOK) {
-                        console.log('Sending slack notification...');
+                        this.logToConsole('Sending slack notification...');
 
                         axios.post(process.env.ERROR_SLACK_HOOK,
                             {
@@ -111,7 +112,7 @@ module.exports = {
                                     })
                                 }
                             }
-                        ).then(() => console.log('Message sent to slack'));
+                        ).then(() => logger.logToConsole('Message sent to slack'));
                     }
                 }
 
@@ -182,7 +183,7 @@ module.exports = {
         //             .populate(actionTo === -1 ? '' : 'toUser')
         //             .exec(function (err, event) {
         //
-        //                 console.log(event);
+        //                 logger.logToConsole(event);
         //
         //                 if (event) {
         //                     LogEvent.findOneAndUpdate({
@@ -196,10 +197,10 @@ module.exports = {
         //                         new: true
         //                     }, function (err, newEvent) {
         //
-        //                         console.log(newEvent);
+        //                         logger.logToConsole(newEvent);
         //
         //                         if (process.env.NODE_ENV === 'production' && process.env.AUDIT_SLACK_HOOK) {
-        //                             console.log('Sending audit log...');
+        //                             logger.logToConsole('Sending audit log...');
         //
         //                             axios.post(process.env.AUDIT_SLACK_HOOK,
         //                                 {
@@ -214,7 +215,7 @@ module.exports = {
         //                                 function (error, response, body) {
         //
         //                                 }
-        //                             ).then(() => console.log('Message sent to slack'));
+        //                             ).then(() => logger.logToConsole('Message sent to slack'));
         //
         //                         }
         //
@@ -223,10 +224,18 @@ module.exports = {
         //                         }
         //                     })
         //                 } else {
-        //                     console.log('Logging fail.')
+        //                     logger.logToConsole('Logging fail.')
         //                 }
         //             });
         //
         //     })
-    }
+    },
+    logToConsole: function logToConsole() {
+        let finalLog = [];
+        for (let i = 0; i < arguments.length; i++) {
+            finalLog.push(arguments[i]);
+        }
+        console.log(...finalLog)
+    },
+    test: () => '123'
 };

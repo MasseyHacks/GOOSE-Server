@@ -37,13 +37,13 @@ UserController.rejectNoState = function (adminUser, callback) {
         'status.rejected': false,
         'status.waitlisted': false
     }, function (err, users) {
-        console.log('Users to be rejected', users, err);
+        logger.logToConsole('Users to be rejected', users, err);
 
         logger.logAction(adminUser._id, -1, 'Rejected everyone without state.', 'EXECUTOR IP: ' + adminUser.ip);
 
         async.each(users, function (user, callback) {
             UserController.rejectUser(adminUser, user._id, (err, msg) => {
-                console.log(user.fullName, err, msg ? 'Success' : 'Fail');
+                logger.logToConsole(user.fullName, err, msg ? 'Success' : 'Fail');
 
                 return callback()
             })
@@ -64,7 +64,7 @@ UserController.modifyUser = function (adminUser, userID, data, callback) {
             new: true
         }, function (err, user) {
             if (err || !user) {
-                console.log(err);
+                logger.logToConsole(err);
                 return callback(err);
             }
             logger.logAction(adminUser._id, userID, 'Modified a user manually.', 'EXECUTOR IP: ' + adminUser.ip + ' | ' + JSON.stringify(data));
@@ -118,7 +118,7 @@ UserController.getUserFields = function (userExecute, userview, callback) {
 
 UserController.getByQuery = function (adminUser, query, callback) {
 
-    if (!query || !query.page || !query.size) {
+    if (!query || !query.page || (!query.size && (query.size && query.size !== 0))) {
         return callback({error: 'Invalid arguments'});
     }
 
@@ -157,13 +157,14 @@ UserController.getByQuery = function (adminUser, query, callback) {
             filters['$and'] = and
         }
     }
-
-    console.log(sort);
+    const logger = require('../services/logger');
+    logger.logToConsole(sort);
 
     User.count(filters, function (err, count) {
 
         if (err) {
-            console.log(err);
+            console.log('166', err);
+            logger.logToConsole(err);
             return callback({error: err.message})
         }
 
@@ -178,7 +179,8 @@ UserController.getByQuery = function (adminUser, query, callback) {
             .limit(size)
             .exec(function (err, users) {
                 if (err) {
-                    console.log(err);
+                    logger.logToConsole(err);
+                    console.log('183', err);
                     return callback({error: err.message})
                 }
 
@@ -189,9 +191,10 @@ UserController.getByQuery = function (adminUser, query, callback) {
 
                         return cb()
                     }, (err) => {
-                        console.log("FINISHED ASYNC USER FIND");
+                        logger.logToConsole("FINISHED ASYNC USER FIND");
                         if (err) {
-                            console.log(err);
+                            console.log('196', err);
+                            logger.logToConsole(err);
                             return callback({error: err})
                         }
 
@@ -206,7 +209,7 @@ UserController.getByQuery = function (adminUser, query, callback) {
                     for (var i = 0; i < users.length; i++) {
                         users[i] = User.filterSensitive(users[i], adminUser.permissions.level, appPage);
 
-                        console.log('out', users[i]);
+                        logger.logToConsole('out', users[i]);
                     }
 
                     return callback(null, {
@@ -228,7 +231,7 @@ UserController.verify = function (token, callback, ip) {
 
     jwt.verify(token, JWT_SECRET, function (err, payload) {
         if (err || !payload) {
-            console.log('ur bad');
+            logger.logToConsole('ur bad');
             return callback({
                 error: 'Invalid Token',
                 code: 401
@@ -254,7 +257,7 @@ UserController.verify = function (token, callback, ip) {
                 new: true
             }, function (err, user) {
                 if (err || !user) {
-                    console.log(err);
+                    logger.logToConsole(err);
 
                     return callback(err);
                 }
@@ -274,7 +277,7 @@ UserController.magicLogin = function (token, callback, ip) {
 
     jwt.verify(token, JWT_SECRET, function (err, payload) {
         if (err || !payload) {
-            console.log('ur bad');
+            logger.logToConsole('ur bad');
             return callback({
                 error: 'Invalid Token',
                 code: 401
@@ -291,7 +294,7 @@ UserController.magicLogin = function (token, callback, ip) {
         User.findOne({_id: payload.id}, '+magicJWT', function (err, user) {
 
             if (err || !user) {
-                console.log(err, user)
+                logger.logToConsole(err, user)
 
                 return callback({
                     error: 'Something went wrong.',
@@ -299,7 +302,7 @@ UserController.magicLogin = function (token, callback, ip) {
                 });
             }
 
-            console.log(user);
+            logger.logToConsole(user);
             if (token === user.magicJWT) {
                 User.findOneAndUpdate({
                         _id: payload.id
@@ -313,7 +316,7 @@ UserController.magicLogin = function (token, callback, ip) {
                         new: true
                     }, function (err, user) {
                         if (err || !user) {
-                            console.log(err);
+                            logger.logToConsole(err);
 
                             return callback(err);
                         }
@@ -350,11 +353,11 @@ UserController.sendVerificationEmail = function (token, callback, ip) {
             })
         }
 
-        var verificationURL = process.env.ROOT_URL + '/verify/' + user.generateVerificationToken();
+        var verificationURL = process.env.FRONTEND_URL + '/verify/' + user.generateVerificationToken();
 
         logger.logAction(user._id, user._id, 'Requested a verification email.', 'IP: ' + ip);
 
-        console.log(verificationURL);
+        logger.logToConsole(verificationURL);
 
         //send the email
         mailer.sendTemplateEmail(user.email, 'verifyemails', {
@@ -448,7 +451,7 @@ UserController.changePassword = function (email, password, callback) {
 
         mailer.sendTemplateEmail(user.email, 'passwordchangedemails', {
             nickname: user.firstName,
-            dashUrl: process.env.ROOT_URL
+            dashUrl: process.env.FRONTEND_URL
         });
 
         return callback(null, {message: 'Success'})
@@ -464,7 +467,7 @@ UserController.resetPassword = function (token, password, callback, ip) {
 
     jwt.verify(token, JWT_SECRET, function (err, payload) {
         if (err || !payload) {
-            console.log('ur bad');
+            logger.logToConsole('ur bad');
             return callback({
                 error: 'Invalid Token',
                 code: 401
@@ -482,7 +485,7 @@ UserController.resetPassword = function (token, password, callback, ip) {
             _id: payload.id
         }, function (err, user) {
             if (err || !user) {
-                console.log(err);
+                logger.logToConsole(err);
 
                 return callback({error: 'Something went wrong'});
             }
@@ -518,11 +521,11 @@ UserController.sendPasswordResetEmail = function (email, callback, ip) {
     User.getByEmail(email, function (err, user) {
 
         if (user && !err) {
-            var resetURL = process.env.ROOT_URL + '/reset/' + user.generateResetToken();
+            var resetURL = process.env.FRONTEND_URL + '/reset/' + user.generateResetToken();
 
             logger.logAction(user._id, user._id, 'Requested a password reset email.', 'IP: ' + ip);
 
-            console.log(resetURL);
+            logger.logToConsole(resetURL);
             mailer.sendTemplateEmail(email, 'passwordresetemails', {
                 nickname: user.firstName,
                 resetUrl: resetURL
@@ -598,16 +601,16 @@ UserController.createUser = function (email, firstName, lastName, password, call
                         'timestamp': Date.now()
                     }, function (err, user) {
 
-                        console.log('dank');
+                        logger.logToConsole('dank');
 
                         if (err || !user) {
-                            console.log(err);
+                            logger.logToConsole(err);
                             return callback(err);
                         } else {
                             var token = user.generateAuthToken();
-                            var verificationURL = process.env.ROOT_URL + '/verify/' + user.generateVerificationToken();
+                            var verificationURL = process.env.FRONTEND_URL + '/verify/' + user.generateVerificationToken();
 
-                            console.log(verificationURL);
+                            logger.logToConsole(verificationURL);
 
                             mailer.sendTemplateEmail(user.email, 'verifyemails', {
                                 nickname: user.firstName,
@@ -631,12 +634,12 @@ UserController.createUser = function (email, firstName, lastName, password, call
 UserController.superToken = function (userExcute, userID, callback) {
     User.getByID(userID, function (err, user) {
         if (err || !user) {
-            console.log(err);
+            logger.logToConsole(err);
             logger.logAction(userExcute.id, userID, "Tried to generate super Link", 'EXECUTOR IP: ' + userExcute.ip + " | Error when generating superLink" + err);
             return callback({error: "Error has occured"})
         }
 
-        console.log(user);
+        logger.logToConsole(user);
 
         var token = user.generateMagicToken();
         User.findOneAndUpdate({
@@ -650,7 +653,7 @@ UserController.superToken = function (userExcute, userID, callback) {
             {
                 new: true
             }, function (err, user) {
-                var link = process.env.ROOT_URL + '/magic?token=' + token;
+                var link = process.env.FRONTEND_URL + '/magic?token=' + token;
                 logger.logAction(userExcute.id, userID, "Generated super Link", 'EXECUTOR IP: ' + userExcute.ip + " | Developer has generated a super link. Link: " + link);
                 callback(false, {url: link})
             })
@@ -705,7 +708,7 @@ UserController.loginWithPassword = function (email, password, callback, ip) {
     }
 
     User.findOne({email: email.toLowerCase()}, '+password', function (err, user) {
-        console.log(user);
+        logger.logToConsole(user);
 
         if (err || !user || user == null || !user.checkPassword(password)) {
 
@@ -728,7 +731,7 @@ UserController.loginWithPassword = function (email, password, callback, ip) {
                     }, function (err, user) {
                         mailer.sendTemplateEmail(user.email, 'magiclinkemails', {
                             nickname: user.firstName,
-                            magicURL: process.env.ROOT_URL + '/magic?token=' + token,
+                            magicURL: process.env.FRONTEND_URL + '/magic?token=' + token,
                             ip: ip
                         });
                     });
@@ -767,7 +770,7 @@ UserController.updateProfile = function (userExecute, id, profile, callback) {
 
     // Validate the user profile, and mark the user as profile completed
     // when successful.
-    console.log('Updating ' + profile);
+    logger.logToConsole('Updating ' + profile);
 
     User.getByID(id, function(err, validationUser) {
         // Already submitted
@@ -857,18 +860,18 @@ UserController.updateProfile = function (userExecute, id, profile, callback) {
                         logger.logAction(userExecute._id, user._id, 'Signed application', 'EXECUTOR IP: ' + userExecute.ip + ' | ' + JSON.stringify(profileValidated));
 
                         SettingsController.requestSchool(userExecute, profileValidated.hacker.school, function (err, msg) {
-                            console.log(err, msg);
+                            logger.logToConsole(err, msg);
                         });
 
                         if (!user.status.submittedApplication) {
                             User.findById(id, function (err, user) {
                                 if (err) {
-                                    console.log('Could not send email:');
-                                    console.log(err);
+                                    logger.logToConsole('Could not send email:');
+                                    logger.logToConsole(err);
                                 }
                                 mailer.sendTemplateEmail(user.email, 'applicationemails', {
                                     nickname: user['firstName'],
-                                    dashUrl: process.env.ROOT_URL
+                                    dashUrl: process.env.FRONTEND_URL
                                 })
                             });
                         }
@@ -960,36 +963,36 @@ UserController.checkAdmissionStatus = function (id) {
     User.getByID(id, function (err, user) {
         if (err || !user) {
             if (err) {
-                console.log(err);
+                logger.logToConsole(err);
             }
 
-            console.log('Error checking admission status for ' + id);
+            logger.logToConsole('Error checking admission status for ' + id);
         } else {
 
             if (!user.status.admitted && !user.status.rejected && !user.status.waitlisted) {
                 if (user.applicationReject.length >= 3) {
                     //user.status.admitted = false;
                     //user.status.rejected = true;
-                    //console.log('Rejected user');
+                    //logger.logToConsole('Rejected user');
 
                     //logger.logAction(-1, user._id, 'Soft rejected user.');
 
                     UserController.rejectUser({_id: -1}, user._id, function(err, user) {
 
-                        console.log(err, user)
+                        logger.logToConsole(err, user)
 
                     })
 
                     //updateStatus(id, user.status);
 
                 } else {
-                    console.log(user);
-                    console.log(user.applicationVotes);
+                    logger.logToConsole(user);
+                    logger.logToConsole(user.applicationVotes);
                     if (user.applicationAdmit.length >= 3) {
                         Settings.findOne({}, function (err, settings) {
 
                             if (err || !settings) {
-                                console.log('Unable to get settings', err);
+                                logger.logToConsole('Unable to get settings', err);
                                 return;
                             }
 
@@ -999,7 +1002,7 @@ UserController.checkAdmissionStatus = function (id) {
                                 'permissions.checkin': false
                             }, function (err, count) {
                                 if (err) {
-                                    console.log('Unable to get count', err);
+                                    logger.logToConsole('Unable to get count', err);
                                     return;
                                 }
 
@@ -1009,10 +1012,10 @@ UserController.checkAdmissionStatus = function (id) {
                                     user.status.admitted = true;
                                     user.status.rejected = false;
                                     user.status.admittedBy = 'MasseyHacks Admission Authority';
-                                    console.log('Admitted user');*/
+                                    logger.logToConsole('Admitted user');*/
 
                                     UserController.admitUser({_id: -1, email: 'MasseyHacks Admission Authority'}, user._id, function(err, user) {
-                                        console.log(err, user);
+                                        logger.logToConsole(err, user);
                                     })
 
                                     //logger.logAction(-1, user._id, 'Accepted user.');
@@ -1020,12 +1023,12 @@ UserController.checkAdmissionStatus = function (id) {
                                     /*
                                     user.status.waitlisted = true;
                                     user.status.rejected = false;
-                                    console.log('Waitlisted User');
+                                    logger.logToConsole('Waitlisted User');
 
                                     logger.logAction(-1, user._id, 'Waitlisted user.');*/
 
                                     UserController.waitlistUser({_id: -1}, user._id, function(err, user) {
-                                        console.log(err, user);
+                                        logger.logToConsole(err, user);
                                     })
                                 }
 
@@ -1086,7 +1089,7 @@ UserController.admitUser = function (adminUser, userID, callback) {
 
         if (!err && user) {
             TeamController.checkIfAutoAdmit(adminUser, user.teamCode, function (err, team) {
-                console.log(err, team);
+                logger.logToConsole(err, team);
             });
         }
 
@@ -1182,11 +1185,11 @@ UserController.inviteToSlack = function (id, email, callback) {
             set_active: true
         }
     }).then(res => {
-        console.log(res);
+        logger.logToConsole(res);
 
         return callback(null, {message: 'Success'});
     }).catch(err => {
-        console.log("invite to slack error");
+        logger.logToConsole("invite to slack error");
         return callback(err);
     });
 
@@ -1219,7 +1222,7 @@ UserController.acceptInvitation = function (executeUser, confirmation, callback)
             return callback(err);
         }
 
-        console.log(err, profileValidated)
+        logger.logToConsole(err, profileValidated)
 
         // Only send email if user hasn't confirmed yet
         User.findOne({
@@ -1233,13 +1236,13 @@ UserController.acceptInvitation = function (executeUser, confirmation, callback)
 
                 if (user && !err) {
                     UserController.inviteToSlack(user._id, user.email,function(err, data){
-                        console.log(err, data);
+                        logger.logToConsole(err, data);
 
                     });
 
                     mailer.sendTemplateEmail(user.email, 'confirmationemails', {
                         nickname: user.firstName,
-                        dashUrl: process.env.ROOT_URL
+                        dashUrl: process.env.FRONTEND_URL
                     });
                 }
         });

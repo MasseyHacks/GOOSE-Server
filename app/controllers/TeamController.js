@@ -22,7 +22,7 @@ TeamController.checkAllTeams = function(adminUser, callback) {
             for (var team in teams) {
 
                 TeamController.checkIfAutoAdmit(adminUser, teams[team].code, function(err, msg) {
-                    console.log(err, msg)
+                    logger.logToConsole(err, msg)
                 })
             }
 
@@ -61,7 +61,7 @@ TeamController.checkIfAutoAdmit = function (adminUser, teamCode, callback) {
                 }
             }
 
-            console.log('Team not eligable for auto admit')
+            logger.logToConsole('Team not eligable for auto admit')
 
             return callback({ error : 'Team doesn\'t meet criteria'});
         });
@@ -69,10 +69,10 @@ TeamController.checkIfAutoAdmit = function (adminUser, teamCode, callback) {
 };
 
 TeamController.teamAccept = function(adminUser, teamCode, callback) {
-    console.log(teamCode)
+    logger.logToConsole(teamCode)
     TeamController.getByCode(teamCode, function (err, team) {
         if (err || !team) {
-            console.log(err)
+            logger.logToConsole(err)
             return callback(err);
         }
 
@@ -83,14 +83,14 @@ TeamController.teamAccept = function(adminUser, teamCode, callback) {
             if (team.memberNames[teamMember]['status']['submittedApplication'] && !team.memberNames[teamMember]['status']['admitted']) {
                 User.resetAdmissionState(adminUser, team.memberNames[teamMember].id, function (err, user) {
 
-                    console.log('Done resetting user status', user.fullName, user)
+                    logger.logToConsole('Done resetting user status', user.fullName, user)
 
                     User.admitUser(adminUser, user._id, function (err, user) {
                         if (err || !user) {
-                            console.log(err)
+                            logger.logToConsole(err)
                         }
 
-                        console.log('Admitted user', user.fullName)
+                        logger.logToConsole('Admitted user', user.fullName)
                     })
 
                 });
@@ -102,10 +102,10 @@ TeamController.teamAccept = function(adminUser, teamCode, callback) {
 };
 
 TeamController.teamReject = function(adminUser, teamCode, callback) {
-    console.log(teamCode)
+    logger.logToConsole(teamCode)
     TeamController.getByCode(teamCode, function (err, team) {
         if (err || !team) {
-            console.log(err)
+            logger.logToConsole(err)
             return callback(err);
         }
 
@@ -116,7 +116,7 @@ TeamController.teamReject = function(adminUser, teamCode, callback) {
             User.resetAdmissionState(adminUser, team.memberNames[teamMember].id, function(err, user) {
                 User.rejectUser(adminUser, user._id, function (err, user) {
                     if (err || !user) {
-                        console.log(err)
+                        logger.logToConsole(err)
                     }
                 })
             });
@@ -377,7 +377,7 @@ TeamController.removeFromTeam = function (userExcute, id, code, callback) {
         _id: id
     }, function (err, user) {
         if (err || !user) {
-            console.log(err)
+            logger.logToConsole(err)
             return callback({ error : 'User doesn\'t exist' });
         }
 
@@ -423,7 +423,7 @@ TeamController.deleteTeamByCode = function (userExcute, code, callback) {
                 if (err) {
                     return callback({error : 'Unable to delete Team'})
                 }
-                console.log(userExcute);
+                logger.logToConsole(userExcute);
                 logger.logAction(userExcute.id, -1, 'Deleted the team: ' + team.name + ' (' + code + ')', 'EXECUTOR IP: ' + userExcute.ip);
 
                 return callback(null, {message : 'Success'})
@@ -443,7 +443,7 @@ TeamController.getFields = function (userExcute, callback) {
     }
 
     fieldsOut.push({'name': "memberNames",});
-    console.log("testing " + fieldsOut);
+    logger.logToConsole("testing " + fieldsOut);
 
     callback(null, fieldsOut)
 };
@@ -463,7 +463,7 @@ TeamController.getByQuery = function (adminUser, query, callback) {
     var or      = [];
     var appPage = query.appPage ? query.appPage : null;
 
-    console.log(appPage);
+    logger.logToConsole(appPage);
 
     if (text) {
         var regex = new RegExp(escapeRegExp(text), 'i'); // filters regex chars, sets to case insensitive
@@ -488,12 +488,12 @@ TeamController.getByQuery = function (adminUser, query, callback) {
         }
     }
 
-    console.log(filters);
+    logger.logToConsole(filters);
 
     Team.count(filters, function(err, count) {
 
         if (err) {
-            console.log(err);
+            logger.logToConsole(err);
             return callback({error:err.message})
         }
 
@@ -509,11 +509,11 @@ TeamController.getByQuery = function (adminUser, query, callback) {
             .populate('memberNames')
             .exec(function(err, teams) {
                 if (err) {
-                    console.log(err);
+                    logger.logToConsole(err);
                     return callback({error:err.message})
                 }
 
-                console.log(teams, count, size);
+                logger.logToConsole(teams, count, size);
 
                 for (var i = 0; i < teams.length; i++) {
                     teams[i] = TeamController.filterNames(teams[i])

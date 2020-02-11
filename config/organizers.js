@@ -3,8 +3,9 @@ const User           = require('../app/models/User');
 const UserController = require('../app/controllers/UserController');
 const mailer         = require('../app/services/email');
 const organizers     = JSON.parse(fs.readFileSync('config/data/organizers.json', 'utf8'));
+const logger         = require('../app/services/logger');
 
-console.log('Trying to add organizers');
+logger.logToConsole('Trying to add organizers');
 
 for(const key in organizers) {
     email      = organizers[key]['email'];
@@ -18,7 +19,7 @@ for(const key in organizers) {
 function makeOrganizer(email, firstName, lastName,  permission) {
         User.getByEmail(email, function (err, user) {
             if (!user) {
-                console.log('Adding: ', email, firstName, lastName, permission);
+                logger.logToConsole('Adding: ', email, firstName, lastName, permission);
 
                 var password = "";
                 var suspension = true;
@@ -61,12 +62,12 @@ function makeOrganizer(email, firstName, lastName,  permission) {
                             {
                                 new: true
                             }, function (err, user) {
-                                console.log(userNew.email + ': ' + process.env.ROOT_URL + '/magic?token=' + token);
+                                logger.logToConsole(userNew.email + ': ' + process.env.FRONTEND_URL + '/magic?token=' + token);
                                 //send the email
                                 if (process.env.NODE_ENV !== 'dev') {
                                     mailer.sendTemplateEmail(user.email, 'magiclinkemails', {
                                         nickname: userNew.firstName,
-                                        magicURL: process.env.ROOT_URL + '/magic?token=' + token,
+                                        magicURL: process.env.FRONTEND_URL + '/magic?token=' + token,
                                         ip: 'MH INTERNAL'
                                     });
                                 }
@@ -76,9 +77,9 @@ function makeOrganizer(email, firstName, lastName,  permission) {
                     if (process.env.NODE_ENV !== 'dev') {
                         UserController.sendPasswordResetEmail(email, function (err) {
                             if (err) {
-                                console.log(err);
+                                logger.logToConsole(err);
                             } else {
-                                console.log('Email successful.');
+                                logger.logToConsole('Email successful.');
                             }
                         });
                     }

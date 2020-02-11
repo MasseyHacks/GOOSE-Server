@@ -2,6 +2,7 @@ require('dotenv').config();
 
 const mongoose   = require('mongoose');
 const userFields = require('./data/UserFields');
+const logger     = require('../services/logger');
 
 JWT_SECRET = process.env.JWT_SECRET;
 
@@ -121,8 +122,8 @@ schema.statics.getEmailQueueStats = function(callback) {
 		if(err || !settings){
 			return callback(err ? err : {error: "Unable to find any email queues.", code: 500})
 		}
-		
-		console.log("settings",settings);
+        const logger = require('../services/logger');
+        logger.logToConsole("settings",settings);
 		var emailQueue = settings.emailQueue;
 		var emailQueueLastFlushed = settings.emailQueueLastFlushed;
 		var dataPack = {total:0};
@@ -135,7 +136,7 @@ schema.statics.getEmailQueueStats = function(callback) {
 			}
 		}
 		delete dataPack["$init"];
-		console.log("queuestats", dataPack);
+		logger.logToConsole("queuestats", dataPack);
 		return callback(null, {stats: dataPack});
 	});
 };

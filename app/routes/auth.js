@@ -47,7 +47,7 @@ module.exports = function(router) {
                     return res.status(500).json(err ? err : {error: 'Unable to process request'});
                 }
 
-                console.log(req.body.email + ' registered.');
+                logger.logToConsole(req.body.email + ' registered.');
 
                 return res.json({
                     token: token,
@@ -60,14 +60,14 @@ module.exports = function(router) {
     router.post('/login', function (req, res) {
         var email = req.body.email;
         var password = req.body.password;
-        console.log(req.body.email + ' attempting to login.');
+        logger.logToConsole(req.body.email + ' attempting to login.');
         UserController.loginWithPassword(email, password, function (err, user, token) {
 
             if (err || !user) {
-                console.log(err);
+                logger.logToConsole(err);
                 return res.status(401).json(err);
             }
-
+            console.log("USER auth.js line 70", user);
             return res.json({
                 token: token,
                 user: user
@@ -114,7 +114,7 @@ module.exports = function(router) {
     router.post('/requestReset', function (req, res) {
         var email = req.body.email;
 
-        console.log(req.body.email + ' requesting reset email.');
+        logger.logToConsole(req.body.email + ' requesting reset email.');
 
         if (!email || !validator.isEmail(email)) {
             return res.status(400).json({error: 'Invalid email'});

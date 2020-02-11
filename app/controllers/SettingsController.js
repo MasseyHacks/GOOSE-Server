@@ -98,7 +98,7 @@ SettingsController.getVerificationProblem = function(adminUser, callback){
 
     returnData['question'] = eq.toString();
 
-    console.log(eq.toString());
+    logger.logToConsole(eq.toString());
     try{
       returnData['answer'] = eq.solveFor(letter).toString();
     }
@@ -197,7 +197,7 @@ SettingsController.requestSchool = function(user, schoolName, callback) {
             if (err || !settings) {
                 return callback({'error':'Unable to add school (It\'s probably already on the list!)'})
             }
-
+            const logger = require('../services/logger');
             logger.logAction(user._id, -1, 'Requested to add school.', 'EXECUTOR IP: ' + user.ip + ' | ' + schoolName);
 
             return callback(null, {'message':'Success'})
@@ -224,7 +224,7 @@ SettingsController.modifyTime = function(user, newTime, callback) {
             if (err || !settings) {
                 return callback({'error':'Unable to update time'})
             }
-
+            const logger = require('../services/logger');
             logger.logAction(user._id, -1, 'Modified global time settings.', 'EXECUTOR IP: ' + user.ip + ' | ' + JSON.stringify(newTime));
 
             return callback(null, settings)
@@ -260,7 +260,7 @@ SettingsController.getLog = function(query, callback){
     var or     = [];
     var and    = [];
 
-    console.log('query', query);
+    logger.logToConsole('query', query);
 
     if (query.text) {
         var regex = new RegExp(escapeRegExp(query.text), 'i'); // filters regex chars, sets to case insensitive
@@ -293,7 +293,7 @@ SettingsController.getLog = function(query, callback){
 
     LogEvent.count(filter, function(err, count) {
         if (err) {
-            console.log(err);
+            logger.logToConsole(err);
             return callback({error:err.message})
         }
 
@@ -309,7 +309,7 @@ SettingsController.getLog = function(query, callback){
             .exec(function (err, log) {
                 if (err || !log) {
                     if (err) {
-                        console.log(err);
+                        logger.logToConsole(err);
                         return callback({error:err.message})
                     }
                     return callback(null, {

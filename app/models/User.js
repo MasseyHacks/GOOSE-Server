@@ -49,14 +49,14 @@ schema.methods.generateResetToken = function () {
 };
 
 schema.methods.setPermission = function (level) {
-    console.log('Got level ', level);
+    logger.logToConsole('Got level ', level);
 
     if (level && typeof level == 'string') {
         for (var key in fields['permissions']) {
 
             if (key == level.toLowerCase()) {
 
-                console.log('Locked to', key);
+                logger.logToConsole('Locked to', key);
 
                 level = fields['permissions'][key]['permissionLevel'];
                 break
@@ -64,7 +64,7 @@ schema.methods.setPermission = function (level) {
         }
     }
 
-    console.log('Translating to ', level);
+    logger.logToConsole('Translating to ', level);
 
     if (!level) {
         level = 0
@@ -78,10 +78,10 @@ schema.methods.setPermission = function (level) {
         permissions: this.permissions
     }, function (err, user) {
         if (err || !user) {
-            console.log('Failed to set permission')
+            logger.logToConsole('Failed to set permission')
         }
 
-        console.log('Permission set')
+        logger.logToConsole('Permission set')
     });
 };
 
@@ -151,7 +151,7 @@ schema.statics.resetAdmissionState = function (adminUser, userID, callback) {
 }
 
 schema.statics.admitUser = function (adminUser, userID, callback) {
-    console.log('trying to admit', userID);
+    logger.logToConsole('trying to admit', userID);
 
     if (!adminUser || !userID) {
         return callback({error: 'Invalid arguments'});
@@ -177,7 +177,7 @@ schema.statics.admitUser = function (adminUser, userID, callback) {
             new: true
         }, function (err, user) {
 
-            console.log('user back:', user)
+            logger.logToConsole('user back:', user)
 
             if (err || !user) {
                 return callback(err ? err : {error: 'Unable to perform action.', code: 400})
@@ -320,8 +320,8 @@ schema.statics.getByEmail = function (email, callback, permissionLevel) {
 };
 
 schema.statics.validateProfile = function (profile, callback) {
-
-    console.log('Validating profile!')
+    const logger = require('../services/logger');
+    logger.logToConsole('Validating profile!');
     try {
         var queue = [[fields.profile, profile]];
         var runner;
@@ -394,13 +394,15 @@ schema.statics.validateProfile = function (profile, callback) {
                 }
             }
         }
+        const logger = require('../services/logger');
 
-        console.log('Profile accepted!')
+        logger.logToConsole('Profile accepted!')
 
         return callback(null, profile);
     } catch (e) {
 
-        console.log('Dammit! Something broke...', e)
+        const logger = require('../services/logger');
+        logger.logToConsole('Dammit! Something broke...', e)
 
         return callback({ error: 'You broke something...' })
 
@@ -535,7 +537,8 @@ schema.statics.filterSensitive = function (user, permission, page) {
 var filterSensitive = function (user, permission, page) {
 
     try {
-        console.log(page);
+        const logger = require('../services/logger');
+        logger.logToConsole(page);
         if (page === 'checkin') {
             return {
                 id: user.id,
@@ -563,7 +566,7 @@ var filterSensitive = function (user, permission, page) {
         var userpath;
         var keys;
 
-        console.log('Permission level:', permissionLevel)
+        logger.logToConsole('Permission level:', permissionLevel)
 
         while (queue.length !== 0) {
             runner = queue[0][0];
@@ -576,7 +579,7 @@ var filterSensitive = function (user, permission, page) {
                         try {
                             delete userpath[keys[i]];
                         } catch (e) {
-                            console.log(e)
+                            logger.logToConsole(e)
                         }
                     }
                     if (permissionLevel < 2 && runner[keys[i]].condition && !navigate(user, runner[keys[i]].condition)) {
@@ -594,6 +597,8 @@ var filterSensitive = function (user, permission, page) {
         return u;
     } catch (e) {
         //Raven.captureException(e);
+        const logger = require('../services/logger');
+        logger.defaultLogger.error(e);
         return {};
     }
 };
