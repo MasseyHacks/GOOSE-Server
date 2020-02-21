@@ -708,7 +708,7 @@ UserController.loginWithPassword = function (email, password, callback, ip) {
     }
 
     User.findOne({email: email.toLowerCase()}, '+password', function (err, user) {
-        logger.logToConsole(user);
+        logger.logToConsole('LINE 711', user);
 
         if (err || !user || user == null || !user.checkPassword(password)) {
 

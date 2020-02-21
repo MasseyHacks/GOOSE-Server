@@ -49,6 +49,7 @@ schema.methods.generateResetToken = function () {
 };
 
 schema.methods.setPermission = function (level) {
+    const logger = require('../services/logger');
     logger.logToConsole('Got level ', level);
 
     if (level && typeof level == 'string') {
@@ -98,7 +99,7 @@ schema.statics.generateHash = function (password) {
 };
 
 schema.statics.resetAdmissionState = function (adminUser, userID, callback) {
-
+    const logger = require('../services/logger');
     if (!adminUser || !userID) {
         return callback({error: 'Invalid arguments'});
     }
@@ -151,6 +152,7 @@ schema.statics.resetAdmissionState = function (adminUser, userID, callback) {
 }
 
 schema.statics.admitUser = function (adminUser, userID, callback) {
+    const logger = require('../services/logger');
     logger.logToConsole('trying to admit', userID);
 
     if (!adminUser || !userID) {
@@ -582,9 +584,11 @@ var filterSensitive = function (user, permission, page) {
                             logger.logToConsole(e)
                         }
                     }
-                    if (permissionLevel < 2 && runner[keys[i]].condition && !navigate(user, runner[keys[i]].condition)) {
-                        userpath[keys[i]] = runner[keys[i]].default;
-                    }
+                    // if (permissionLevel < 2 && runner[keys[i]].condition && !navigate(user, runner[keys[i]].condition)) {
+                    //     userpath[keys[i]] = runner[keys[i]].default;
+                    //     console.log(keys[i])
+                    // }
+                    // TODO: Fix removal of things that shouldn't be removed such as admitted?
 
                 } else {
                   if (userpath[keys[i]]) {
