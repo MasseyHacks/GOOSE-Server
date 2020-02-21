@@ -65,6 +65,12 @@ var status = {
         default: false,
         caption: "Confirmed Invitation"
     },
+    paid: {
+        type: Boolean,
+        required: false,
+        default: false,
+        caption: "Paid for ticket"
+    },
     waiver: {
         type: Boolean,
         required: true,

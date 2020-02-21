@@ -72,6 +72,10 @@ var authRouter = express.Router();
 require('./app/routes/auth')(authRouter);
 app.use('/auth', authRouter);
 
+const paymentRouter = express.Router();
+require('./app/routes/payment')(paymentRouter);
+app.use('/payment', paymentRouter);
+
 app.listen(port, () => {
     // logger.logToConsole(`listening on port ${port}`);
     logger.defaultLogger.info(`listening on port ${port}`)

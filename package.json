@@ -33,6 +33,7 @@
     "moment": "^2.24.0",
     "mongoose": "^5.8.11",
     "nodemailer": "^6.4.2",
+    "stripe": "^8.19.0",
     "uuid": "^3.4.0",
     "validator": "^11.1.0",
     "winston": "^3.2.1"
