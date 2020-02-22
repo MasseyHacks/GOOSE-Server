@@ -584,11 +584,10 @@ var filterSensitive = function (user, permission, page) {
                             logger.logToConsole(e)
                         }
                     }
-                    // if (permissionLevel < 2 && runner[keys[i]].condition && !navigate(user, runner[keys[i]].condition)) {
-                    //     userpath[keys[i]] = runner[keys[i]].default;
-                    //     console.log(keys[i])
-                    // }
-                    // TODO: Fix removal of things that shouldn't be removed such as admitted?
+                    if (permissionLevel < 2 && runner[keys[i]].condition && !navigate(user, runner[keys[i]].condition)) {
+                        userpath[keys[i]] = runner[keys[i]].default;
+                        console.log(keys[i])
+                    }
 
                 } else {
                   if (userpath[keys[i]]) {
