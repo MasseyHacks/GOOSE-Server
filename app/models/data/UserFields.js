@@ -340,13 +340,13 @@ var workshopHost = {
 };
 
 var confirmation = {
-    bus: {
-        type: Boolean,
-        questionType: 'boolean',
-        question: 'Will you be travelling on our Toronto/Waterloo bus?',
-        mandatory: true,
-        precaption: 'TRANSPORTATION'
-    },
+    // bus: {
+    //     type: Boolean,
+    //     questionType: 'boolean',
+    //     question: 'Will you be travelling on our Toronto/Waterloo bus?',
+    //     mandatory: true,
+    //     precaption: 'TRANSPORTATION'
+    // },
 
     additionalNotes: {
         type: String,
