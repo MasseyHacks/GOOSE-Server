@@ -425,7 +425,6 @@ var permissions = {
     }
 };
 
-
 var schema = {
 
     firstName: {
@@ -556,7 +555,12 @@ var schema = {
     userType: userType,
 
     // Only parts user can update
-    profile: profile
+    profile: profile,
+    points: {
+        history : {
+            type: [Object]
+        }
+    }
 };
 
 module.exports = schema;

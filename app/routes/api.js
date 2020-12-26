@@ -19,6 +19,7 @@ const permissions        = require('../services/permissions');
 const logger             = require('../services/logger');
 const mailer             = require('../services/email');
 const stats              = require('../services/stats');
+const bulkModifyTeams    = require('../services/bulkModifyTeams');
 
 require('dotenv').config();
 
@@ -26,6 +27,12 @@ JWT_SECRET             = process.env.JWT_SECRET;
 
 module.exports = function(router) {
     router.use(express.json());
+
+    // Admin
+    // Deactivate all teams
+    router.post('/deactivateAllTeams', permissions.isOwner, function(req, res){
+        bulkModifyTeams.deactivateAll(req.userExecute, logger.defaultResponse(req, res));
+    })
 
 	// Owner
 	// Get queue size

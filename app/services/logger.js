@@ -69,7 +69,7 @@ async function getLogActor(id) {
     }
 }
 
-module.exports = {
+let Logger = {
     defaultLogger: createWinstonLogger(),
     defaultResponse : function(req, res, responseJSON = true){
         return function(err, data){
@@ -81,14 +81,14 @@ module.exports = {
                 if (process.env.NODE_ENV === 'production'){
 
                     let data =  'Request: ' + req.method + ' ' + req.url + '\n' +
-                                'User: ' + req.userExecute['fullName'] + ' ' + req.userExecute['ip'] + '\n' +
-                                '\n -------------------------- \n' +
-                                'Body: \n ' +
-                                JSON.stringify(req.body, null, 2) +
-                                '\n -------------------------- \n' +
-                                '\nError:\n' +
-                                JSON.stringify(err, null, 2) +
-                                '``` \n';
+                        'User: ' + req.userExecute['fullName'] + ' ' + req.userExecute['ip'] + '\n' +
+                        '\n -------------------------- \n' +
+                        'Body: \n ' +
+                        JSON.stringify(req.body, null, 2) +
+                        '\n -------------------------- \n' +
+                        '\nError:\n' +
+                        JSON.stringify(err, null, 2) +
+                        '``` \n';
                     this.defaultLogger.error(data.replace('\n', ' '));
                     /*if (process.env.SERVER_RAVEN_KEY && (!err.code || err.code >= 500)) {
                         Raven.captureMessage(data, {
@@ -107,8 +107,8 @@ module.exports = {
                                         'icon_emoji': ':happydoris:',
                                         'username': 'CrashBot',
                                         'text':
-                                        'Hey! ' + ((!err.code || err.code >= 500) ? process.env.ADMIN_UIDS : '') + ' An issue was detected with the server.\n\n```' +
-                                        data
+                                            'Hey! ' + ((!err.code || err.code >= 500) ? process.env.ADMIN_UIDS : '') + ' An issue was detected with the server.\n\n```' +
+                                            data
                                     })
                                 }
                             }
@@ -126,6 +126,13 @@ module.exports = {
                 }
             }
         };
+    },
+    logToConsole: function logToConsole() {
+        let finalLog = [];
+        for (let i = 0; i < arguments.length; i++) {
+            finalLog.push(arguments[i]);
+        }
+        console.log(...finalLog)
     },
     logAction : async function (actionFrom, actionTo, message, detailedMessage, cb) {
         // Start bash
@@ -168,74 +175,54 @@ module.exports = {
             cb()
         }
 
-        // LogEvent
-        //     .create({
-        //         'to.ID': actionTo,
-        //         'from.ID': actionFrom,
-        //         'message': message,
-        //         'detailedMessage': detailedMessage,
-        //         'timestamp': Date.now()
-        //     }, function (err, e) {
-        //
-        //         LogEvent
-        //             .findOne({_id: e._id})
-        //             .populate(actionFrom === -1 ? '' : 'fromUser') // Only populate if user exists
-        //             .populate(actionTo === -1 ? '' : 'toUser')
-        //             .exec(function (err, event) {
-        //
-        //                 logger.logToConsole(event);
-        //
-        //                 if (event) {
-        //                     LogEvent.findOneAndUpdate({
-        //                         _id: event._id
-        //                     }, {
-        //                         'from.name': actionFrom === -1 ? 'MasseyHacks Internal Authority' : event.fromUser !== null ? event.fromUser.fullName : 'Unable to get name',
-        //                         'from.email': actionFrom === -1 ? 'internal@masseyhacks.ca' : event.fromUser !== null ? event.fromUser.email : 'Unable to get name',
-        //                         'to.name': actionTo === -1 ? 'MasseyHacks Internal Authority' : event.toUser !== null ? event.toUser.fullName : 'Unable to get name',
-        //                         'to.email': actionTo === -1 ? 'internal@masseyhacks.ca' : event.toUser !== null ? event.toUser.email : 'Unable to get email'
-        //                     }, {
-        //                         new: true
-        //                     }, function (err, newEvent) {
-        //
-        //                         logger.logToConsole(newEvent);
-        //
-        //                         if (process.env.NODE_ENV === 'production' && process.env.AUDIT_SLACK_HOOK) {
-        //                             logger.logToConsole('Sending audit log...');
-        //
-        //                             axios.post(process.env.AUDIT_SLACK_HOOK,
-        //                                 {
-        //                                     form: {
-        //                                         payload: JSON.stringify({
-        //                                             'icon_emoji': ':pcedoris:',
-        //                                             'username': 'AuditBot',
-        //                                             'text': '```' + newEvent + '```'
-        //                                         })
-        //                                     }
-        //                                 },
-        //                                 function (error, response, body) {
-        //
-        //                                 }
-        //                             ).then(() => logger.logToConsole('Message sent to slack'));
-        //
-        //                         }
-        //
-        //                         if (cb) {
-        //                             cb();
-        //                         }
-        //                     })
-        //                 } else {
-        //                     logger.logToConsole('Logging fail.')
-        //                 }
-        //             });
-        //
-        //     })
-    },
-    logToConsole: function logToConsole() {
-        let finalLog = [];
-        for (let i = 0; i < arguments.length; i++) {
-            finalLog.push(arguments[i]);
+
+        if(process.env.NODE_ENV === 'development'){
+            LogEvent
+                .create({
+                    'to.ID': actionTo,
+                    'from.ID': actionFrom,
+                    'message': message,
+                    'detailedMessage': detailedMessage,
+                    'timestamp': Date.now()
+                }, function (err, e) {
+
+                    LogEvent
+                        .findOne({_id: e._id})
+                        .populate(actionFrom === -1 ? '' : 'fromUser') // Only populate if user exists
+                        .populate(actionTo === -1 ? '' : 'toUser')
+                        .exec(function (err, event) {
+
+                            Logger.logToConsole(event);
+
+                            if (event) {
+                                LogEvent.findOneAndUpdate({
+                                    _id: event._id
+                                }, {
+                                    'from.name': actionFrom === -1 ? 'MasseyHacks Internal Authority' : event.fromUser !== null ? event.fromUser.fullName : 'Unable to get name',
+                                    'from.email': actionFrom === -1 ? 'internal@masseyhacks.ca' : event.fromUser !== null ? event.fromUser.email : 'Unable to get name',
+                                    'to.name': actionTo === -1 ? 'MasseyHacks Internal Authority' : event.toUser !== null ? event.toUser.fullName : 'Unable to get name',
+                                    'to.email': actionTo === -1 ? 'internal@masseyhacks.ca' : event.toUser !== null ? event.toUser.email : 'Unable to get email'
+                                }, {
+                                    new: true
+                                }, function (err, newEvent) {
+
+                                    Logger.logToConsole(newEvent);
+
+                                    if (cb) {
+                                        cb();
+                                    }
+                                })
+                            } else {
+                                Logger.logToConsole('Logging fail.')
+                            }
+                        });
+
+                })
         }
-        console.log(...finalLog)
+
     },
+
     test: () => '123'
 };
+
+module.exports = Logger;

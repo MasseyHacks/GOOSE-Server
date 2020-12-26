@@ -15,7 +15,7 @@ function escapeRegExp(str) {
 
 TeamController.checkAllTeams = function(adminUser, callback) {
     Team
-        .find({})
+        .find({active: true})
         .populate('memberNames')
         .exec(function(err, teams) {
 
@@ -36,7 +36,8 @@ TeamController.checkIfAutoAdmit = function (adminUser, teamCode, callback) {
 
     Team
         .findOne({
-            code : teamCode
+            code : teamCode,
+            active: true
         })
         .populate('memberNames')
         .exec(function (err, team) {
@@ -190,12 +191,13 @@ TeamController.joinTeam = function(id, teamCode, callback) {
 
         Team
             .findOne({
-                code : teamCode.trim()
+                code : teamCode.trim(),
+                active: true
             })
             .select('+memberIDs')
             .exec(function (err, team) {
                 if (err || !team) { // Team doesn't exist yet
-                    return callback({ error : 'Team doesn\'t exist', code: 404 });
+                    return callback({ error : 'Team doesn\'t exist or has been marked inactive.', code: 404 });
                 }
 
                 if (team.memberIDs.length < process.env.TEAM_MAX_SIZE) { // Can still join team

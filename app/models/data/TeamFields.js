@@ -18,6 +18,14 @@ schema = {
     memberIDs : {
         type: [String],
         select: false
+    },
+    active: {
+        type: Boolean,
+        required: true,
+        default: true
+    },
+    deactivated: {
+        type: Date
     }
 };
 

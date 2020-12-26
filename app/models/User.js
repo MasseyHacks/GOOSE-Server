@@ -532,6 +532,13 @@ schema.virtual('profile.isSigned').get(function () {
     return this.profile.signature !== -1;
 });
 
+schema.virtual('points.total').get(function() {
+    let acc = 0;
+    for (let pointInfo of this.points.history){
+        acc += pointInfo.points;
+    }
+});
+
 schema.statics.filterSensitive = function (user, permission, page) {
     return filterSensitive(user, permission, page);
 };

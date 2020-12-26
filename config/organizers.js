@@ -24,7 +24,7 @@ function makeOrganizer(email, firstName, lastName,  permission) {
                 var password = "";
                 var suspension = true;
 
-                if (process.env.NODE_ENV === 'dev') {
+                if (process.env.NODE_ENV === 'development') {
                     password = "123456";
                     suspension = false;
                 }
@@ -64,7 +64,7 @@ function makeOrganizer(email, firstName, lastName,  permission) {
                             }, function (err, user) {
                                 logger.logToConsole(userNew.email + ': ' + process.env.FRONTEND_URL + '/magic?token=' + token);
                                 //send the email
-                                if (process.env.NODE_ENV !== 'dev') {
+                                if (process.env.NODE_ENV !== 'development') {
                                     mailer.sendTemplateEmail(user.email, 'magiclinkemails', {
                                         nickname: userNew.firstName,
                                         magicURL: process.env.FRONTEND_URL + '/magic?token=' + token,
@@ -74,7 +74,7 @@ function makeOrganizer(email, firstName, lastName,  permission) {
                             })
                     }
 
-                    if (process.env.NODE_ENV !== 'dev') {
+                    if (process.env.NODE_ENV !== 'development') {
                         UserController.sendPasswordResetEmail(email, function (err) {
                             if (err) {
                                 logger.logToConsole(err);
