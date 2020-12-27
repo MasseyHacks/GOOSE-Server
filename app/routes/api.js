@@ -34,6 +34,12 @@ module.exports = function(router) {
         bulkModifyTeams.deactivateAll(req.userExecute, logger.defaultResponse(req, res));
     })
 
+    // Admin
+    // Deactivate one team
+    router.post('/deactivateTeam', permissions.isOwner, function(req, res){
+        TeamController.deactivateTeam(req.userExecute, req.body.code, logger.defaultResponse(req, res));
+    })
+
 	// Owner
 	// Get queue size
 	router.get('/getEmailQueueStats', permissions.isOwner, function(req, res){

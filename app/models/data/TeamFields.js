@@ -13,7 +13,8 @@ schema = {
     },
     code : {
         type: String,
-        required: true
+        required: true,
+        index: true
     },
     memberIDs : {
         type: [String],

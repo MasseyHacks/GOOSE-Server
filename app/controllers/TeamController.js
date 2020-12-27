@@ -539,4 +539,44 @@ TeamController.filterNames = function (team) {
     return team
 };
 
+TeamController.deactivateTeam = function(adminUser, code, callback, log=true){
+    // Deactivates the team without removing it
+    // The team will retain references to the users but user.teamCode will be erased
+    if(log){
+        logger.logAction(adminUser._id, -1, "Deactivated a team.", code);
+    }
+    Team.findOneAndUpdate({code: code}, {
+        active: false,
+        deactivated: Date.now()
+    },
+        {
+            fields: {"memberIDs": 1},
+            new: true
+        },
+        function(err, team){
+        if(err){
+            // Do not disassociate team
+            return callback(err);
+        }
+
+        // Remove the teamCode reference from the user as well.
+        for(let member of team.memberIDs){
+            User.updateOne(
+                {
+                    _id: member
+                },
+                {
+                    teamCode: ''
+                },
+                function(err){
+                    if(err){
+                        logger.logToConsole(`Unable to disassociate user ${member} from ${code}`, err);
+                    }
+                });
+        }
+        return callback(null, "Team deactivation has been queued. Please check the logs for any errors.");
+    })
+
+}
+
 module.exports = TeamController;

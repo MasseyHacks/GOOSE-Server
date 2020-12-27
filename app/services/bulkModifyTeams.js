@@ -1,10 +1,10 @@
-const User = require('../models/User');
 const Team = require('../models/Team');
+const TeamController = require('../controllers/TeamController');
 const logger = require('./logger');
 
 module.exports = {
     deactivateAll : function(adminUser, callback){
-        logger.logAction(adminUser._id, -1, "Deactivated all currently active teams.");
+        logger.logAction(adminUser._id, -1, "Initiated a deactivation of all currently active teams.");
         Team.find({
             active: true
         }).select('+memberIDs').exec(function(err, teams){
@@ -14,33 +14,13 @@ module.exports = {
 
             // Iterate through teams that are active
             for (let team of teams) {
-                Team.updateOne({_id: team.id}, {
-                    active: false,
-                    deactivated: Date.now()
-                }, function(err, info){
+                TeamController.deactivateTeam(adminUser, team.code, function(err){
                     if(err){
-                        logger.logToConsole(`Unable to deactivate team ${team.id}.`, err);
-                        // Do not disassociate team
-                        return;
+                        logger.logToConsole(`Unable to deactivate team ${team.code}.`, err);
                     }
-
-                    // Remove the teamCode reference from the user as well.
-                    for(let member of team.memberIDs){
-                        User.updateOne(
-                            {
-                                _id: member
-                            },
-                            {
-                                teamCode: ''
-                            },
-                            function(err){
-                                if(err){
-                                    logger.logToConsole(`Unable to disassociate user ${member} from ${team.id}`, err);
-                                }
-                            });
-                    }
-                })
+                }, false);
             }
+
             return callback({message: "Team deactivations queued. Check the log for any errors.", code: 200});
         })
 
