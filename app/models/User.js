@@ -50,14 +50,14 @@ schema.methods.generateResetToken = function () {
 
 schema.methods.setPermission = function (level) {
     const logger = require('../services/logger');
-    logger.logToConsole('Got level ', level);
+    logger.logConsoleDebug('Got level ', level);
 
     if (level && typeof level == 'string') {
         for (var key in fields['permissions']) {
 
             if (key == level.toLowerCase()) {
 
-                logger.logToConsole('Locked to', key);
+                logger.logConsoleDebug('Locked to', key);
 
                 level = fields['permissions'][key]['permissionLevel'];
                 break
@@ -65,7 +65,7 @@ schema.methods.setPermission = function (level) {
         }
     }
 
-    logger.logToConsole('Translating to ', level);
+    logger.logConsoleDebug('Translating to ', level);
 
     if (!level) {
         level = 0
@@ -79,10 +79,10 @@ schema.methods.setPermission = function (level) {
         permissions: this.permissions
     }, function (err, user) {
         if (err || !user) {
-            logger.logToConsole('Failed to set permission')
+            logger.logConsoleDebug('Failed to set permission')
         }
 
-        logger.logToConsole('Permission set')
+        logger.logConsoleDebug('Permission set')
     });
 };
 
@@ -153,7 +153,7 @@ schema.statics.resetAdmissionState = function (adminUser, userID, callback) {
 
 schema.statics.admitUser = function (adminUser, userID, callback) {
     const logger = require('../services/logger');
-    logger.logToConsole('trying to admit', userID);
+    logger.logConsoleDebug('Trying to admit', userID);
 
     if (!adminUser || !userID) {
         return callback({error: 'Invalid arguments'});
@@ -179,7 +179,7 @@ schema.statics.admitUser = function (adminUser, userID, callback) {
             new: true
         }, function (err, user) {
 
-            logger.logToConsole('user back:', user)
+            logger.logConsoleDebug('Returned user:', user)
 
             if (err || !user) {
                 return callback(err ? err : {error: 'Unable to perform action.', code: 400})
@@ -323,7 +323,7 @@ schema.statics.getByEmail = function (email, callback, permissionLevel) {
 
 schema.statics.validateProfile = function (profile, callback) {
     const logger = require('../services/logger');
-    logger.logToConsole('Validating profile!');
+    logger.logConsoleDebug('Validating profile!');
     try {
         var queue = [[fields.profile, profile]];
         var runner;
@@ -398,13 +398,13 @@ schema.statics.validateProfile = function (profile, callback) {
         }
         const logger = require('../services/logger');
 
-        logger.logToConsole('Profile accepted!')
+        logger.logConsoleDebug('Profile accepted!')
 
         return callback(null, profile);
     } catch (e) {
 
         const logger = require('../services/logger');
-        logger.logToConsole('Dammit! Something broke...', e)
+        logger.defaultLogger.error('Error while validating user profile. ', e)
 
         return callback({ error: 'You broke something...' })
 
@@ -547,7 +547,7 @@ var filterSensitive = function (user, permission, page) {
 
     try {
         const logger = require('../services/logger');
-        logger.logToConsole(page);
+        logger.logConsoleDebug(page);
         if (page === 'checkin') {
             return {
                 id: user.id,
@@ -575,7 +575,7 @@ var filterSensitive = function (user, permission, page) {
         var userpath;
         var keys;
 
-        logger.logToConsole('Permission level:', permissionLevel)
+        logger.logConsoleDebug('Permission level:', permissionLevel)
 
         while (queue.length !== 0) {
             runner = queue[0][0];
@@ -588,12 +588,12 @@ var filterSensitive = function (user, permission, page) {
                         try {
                             delete userpath[keys[i]];
                         } catch (e) {
-                            logger.logToConsole(e)
+                            logger.defaultLogger.error(e)
                         }
                     }
                     if (permissionLevel < 2 && runner[keys[i]].condition && !navigate(user, runner[keys[i]].condition)) {
                         userpath[keys[i]] = runner[keys[i]].default;
-                        console.log(keys[i])
+                        // console.log(keys[i])
                     }
 
                 } else {

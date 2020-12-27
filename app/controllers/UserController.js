@@ -37,13 +37,13 @@ UserController.rejectNoState = function (adminUser, callback) {
         'status.rejected': false,
         'status.waitlisted': false
     }, function (err, users) {
-        logger.logToConsole('Users to be rejected', users, err);
+        logger.logConsoleDebug('Users to be rejected', users, err);
 
         logger.logAction(adminUser._id, -1, 'Rejected everyone without state.', 'EXECUTOR IP: ' + adminUser.ip);
 
         async.each(users, function (user, callback) {
             UserController.rejectUser(adminUser, user._id, (err, msg) => {
-                logger.logToConsole(user.fullName, err, msg ? 'Success' : 'Fail');
+                logger.logConsoleDebug(user.fullName, err, msg ? 'Success' : 'Fail');
 
                 return callback()
             })
@@ -64,7 +64,7 @@ UserController.modifyUser = function (adminUser, userID, data, callback) {
             new: true
         }, function (err, user) {
             if (err || !user) {
-                logger.logToConsole(err);
+                logger.defaultLogger.error(err);
                 return callback(err);
             }
             logger.logAction(adminUser._id, userID, 'Modified a user manually.', 'EXECUTOR IP: ' + adminUser.ip + ' | ' + JSON.stringify(data));
@@ -158,13 +158,13 @@ UserController.getByQuery = function (adminUser, query, callback) {
         }
     }
     const logger = require('../services/logger');
-    logger.logToConsole(sort);
+    logger.logConsoleDebug(sort);
 
     User.count(filters, function (err, count) {
 
         if (err) {
-            console.log('166', err);
-            logger.logToConsole(err);
+            // console.log('166', err);
+            logger.defaultLogger.error(err);
             return callback({error: err.message})
         }
 
@@ -179,8 +179,8 @@ UserController.getByQuery = function (adminUser, query, callback) {
             .limit(size)
             .exec(function (err, users) {
                 if (err) {
-                    logger.logToConsole(err);
-                    console.log('183', err);
+                    logger.defaultLogger.error(err);
+                    // console.log('183', err);
                     return callback({error: err.message})
                 }
 
@@ -191,10 +191,10 @@ UserController.getByQuery = function (adminUser, query, callback) {
 
                         return cb()
                     }, (err) => {
-                        logger.logToConsole("FINISHED ASYNC USER FIND");
+                        logger.logConsoleDebug("FINISHED ASYNC USER FIND");
                         if (err) {
-                            console.log('196', err);
-                            logger.logToConsole(err);
+                            // console.log('196', err);
+                            logger.defaultLogger.error(err);
                             return callback({error: err})
                         }
 
@@ -231,7 +231,7 @@ UserController.verify = function (token, callback, ip) {
 
     jwt.verify(token, JWT_SECRET, function (err, payload) {
         if (err || !payload) {
-            logger.logToConsole('ur bad');
+            logger.logConsoleDebug('Verify token invalid.');
             return callback({
                 error: 'Invalid Token',
                 code: 401
@@ -257,7 +257,7 @@ UserController.verify = function (token, callback, ip) {
                 new: true
             }, function (err, user) {
                 if (err || !user) {
-                    logger.logToConsole(err);
+                    logger.defaultLogger.error(err);
 
                     return callback(err);
                 }
@@ -277,7 +277,7 @@ UserController.magicLogin = function (token, callback, ip) {
 
     jwt.verify(token, JWT_SECRET, function (err, payload) {
         if (err || !payload) {
-            logger.logToConsole('ur bad');
+            logger.logConsoleDebug('Magic login token invalid.');
             return callback({
                 error: 'Invalid Token',
                 code: 401
@@ -294,7 +294,7 @@ UserController.magicLogin = function (token, callback, ip) {
         User.findOne({_id: payload.id}, '+magicJWT', function (err, user) {
 
             if (err || !user) {
-                logger.logToConsole(err, user)
+                logger.defaultLogger.error(`Error finding user ${payload.id} while attempting magic login. `, err);
 
                 return callback({
                     error: 'Something went wrong.',
@@ -302,7 +302,7 @@ UserController.magicLogin = function (token, callback, ip) {
                 });
             }
 
-            logger.logToConsole(user);
+            logger.logConsoleDebug("Logging in user via magic:", user);
             if (token === user.magicJWT) {
                 User.findOneAndUpdate({
                         _id: payload.id
@@ -316,7 +316,7 @@ UserController.magicLogin = function (token, callback, ip) {
                         new: true
                     }, function (err, user) {
                         if (err || !user) {
-                            logger.logToConsole(err);
+                            logger.defaultLogger.error(err);
 
                             return callback(err);
                         }
@@ -357,7 +357,7 @@ UserController.sendVerificationEmail = function (token, callback, ip) {
 
         logger.logAction(user._id, user._id, 'Requested a verification email.', 'IP: ' + ip);
 
-        logger.logToConsole(verificationURL);
+        logger.logConsoleDebug(verificationURL);
 
         //send the email
         mailer.sendTemplateEmail(user.email, 'verifyemails', {
@@ -467,7 +467,7 @@ UserController.resetPassword = function (token, password, callback, ip) {
 
     jwt.verify(token, JWT_SECRET, function (err, payload) {
         if (err || !payload) {
-            logger.logToConsole('ur bad');
+            logger.logConsoleDebug('Password reset token invalid.');
             return callback({
                 error: 'Invalid Token',
                 code: 401
@@ -485,7 +485,7 @@ UserController.resetPassword = function (token, password, callback, ip) {
             _id: payload.id
         }, function (err, user) {
             if (err || !user) {
-                logger.logToConsole(err);
+                logger.defaultLogger.error(err);
 
                 return callback({error: 'Something went wrong'});
             }
@@ -525,7 +525,7 @@ UserController.sendPasswordResetEmail = function (email, callback, ip) {
 
             logger.logAction(user._id, user._id, 'Requested a password reset email.', 'IP: ' + ip);
 
-            logger.logToConsole(resetURL);
+            logger.logConsoleDebug(resetURL);
             mailer.sendTemplateEmail(email, 'passwordresetemails', {
                 nickname: user.firstName,
                 resetUrl: resetURL
@@ -601,16 +601,14 @@ UserController.createUser = function (email, firstName, lastName, password, call
                         'timestamp': Date.now()
                     }, function (err, user) {
 
-                        logger.logToConsole('dank');
-
                         if (err || !user) {
-                            logger.logToConsole(err);
+                            logger.defaultLogger.error(err);
                             return callback(err);
                         } else {
                             var token = user.generateAuthToken();
                             var verificationURL = process.env.FRONTEND_URL + '/verify/' + user.generateVerificationToken();
 
-                            logger.logToConsole(verificationURL);
+                            logger.logConsoleDebug("Verification URL: ", verificationURL);
 
                             mailer.sendTemplateEmail(user.email, 'verifyemails', {
                                 nickname: user.firstName,
@@ -634,12 +632,10 @@ UserController.createUser = function (email, firstName, lastName, password, call
 UserController.superToken = function (userExcute, userID, callback) {
     User.getByID(userID, function (err, user) {
         if (err || !user) {
-            logger.logToConsole(err);
+            logger.defaultLogger.error(err);
             logger.logAction(userExcute.id, userID, "Tried to generate super Link", 'EXECUTOR IP: ' + userExcute.ip + " | Error when generating superLink" + err);
             return callback({error: "Error has occured"})
         }
-
-        logger.logToConsole(user);
 
         var token = user.generateMagicToken();
         User.findOneAndUpdate({
@@ -708,7 +704,6 @@ UserController.loginWithPassword = function (email, password, callback, ip) {
     }
 
     User.findOne({email: email.toLowerCase()}, '+password', function (err, user) {
-        logger.logToConsole('LINE 711', user);
 
         if (err || !user || user == null || !user.checkPassword(password)) {
 
@@ -770,7 +765,7 @@ UserController.updateProfile = function (userExecute, id, profile, callback) {
 
     // Validate the user profile, and mark the user as profile completed
     // when successful.
-    logger.logToConsole('Updating ' + profile);
+    logger.logConsoleDebug('Updating profile' + profile);
 
     User.getByID(id, function(err, validationUser) {
         // Already submitted
@@ -860,14 +855,15 @@ UserController.updateProfile = function (userExecute, id, profile, callback) {
                         logger.logAction(userExecute._id, user._id, 'Signed application', 'EXECUTOR IP: ' + userExecute.ip + ' | ' + JSON.stringify(profileValidated));
 
                         SettingsController.requestSchool(userExecute, profileValidated.hacker.school, function (err, msg) {
-                            logger.logToConsole(err, msg);
+                            if(err){
+                                logger.defaultLogger.error(`Error requesting school ${profileValidated.hacker.school}. `, err);
+                            }
                         });
 
                         if (!user.status.submittedApplication) {
                             User.findById(id, function (err, user) {
                                 if (err) {
-                                    logger.logToConsole('Could not send email:');
-                                    logger.logToConsole(err);
+                                    logger.defaultLogger.error(`Error retrieving user ${id} while attempting to send application email.`, err);
                                 }
                                 mailer.sendTemplateEmail(user.email, 'applicationemails', {
                                     nickname: user['firstName'],
@@ -963,36 +959,27 @@ UserController.checkAdmissionStatus = function (id) {
     User.getByID(id, function (err, user) {
         if (err || !user) {
             if (err) {
-                logger.logToConsole(err);
+                logger.defaultLogger.error(`Error while attempting to retrieve user ${id} to check admission status. `, err);
             }
 
-            logger.logToConsole('Error checking admission status for ' + id);
         } else {
 
             if (!user.status.admitted && !user.status.rejected && !user.status.waitlisted) {
                 if (user.applicationReject.length >= 3) {
-                    //user.status.admitted = false;
-                    //user.status.rejected = true;
-                    //logger.logToConsole('Rejected user');
-
-                    //logger.logAction(-1, user._id, 'Soft rejected user.');
 
                     UserController.rejectUser({_id: -1}, user._id, function(err, user) {
 
-                        logger.logToConsole(err, user)
+                        logger.defaultLogger.error(`Error rejecting user ${id} that has more than three reject votes. `, err);
 
                     })
 
-                    //updateStatus(id, user.status);
-
                 } else {
-                    logger.logToConsole(user);
-                    logger.logToConsole(user.applicationVotes);
+                    logger.defaultLogger.debug(`User ${user._id} has ${user.applicationVotes} application votes.`);
                     if (user.applicationAdmit.length >= 3) {
                         Settings.findOne({}, function (err, settings) {
 
                             if (err || !settings) {
-                                logger.logToConsole('Unable to get settings', err);
+                                logger.logToConsole('Unable to get settings while attempting to admit user.', err);
                                 return;
                             }
 
@@ -1002,7 +989,7 @@ UserController.checkAdmissionStatus = function (id) {
                                 'permissions.checkin': false
                             }, function (err, count) {
                                 if (err) {
-                                    logger.logToConsole('Unable to get count', err);
+                                    logger.defaultLogger.error('Unable to get count of number of non-declined admissions while attempting to admit user.', err);
                                     return;
                                 }
 
@@ -1015,20 +1002,20 @@ UserController.checkAdmissionStatus = function (id) {
                                     logger.logToConsole('Admitted user');*/
 
                                     UserController.admitUser({_id: -1, email: 'MasseyHacks Admission Authority'}, user._id, function(err, user) {
-                                        logger.logToConsole(err, user);
+                                        if (err){
+                                            logger.defaultLogger.error("Error admitting user after admit.", err);
+                                        }
+                                        logger.defaultLogger.silly(user);
                                     })
 
                                     //logger.logAction(-1, user._id, 'Accepted user.');
                                 } else {
-                                    /*
-                                    user.status.waitlisted = true;
-                                    user.status.rejected = false;
-                                    logger.logToConsole('Waitlisted User');
-
-                                    logger.logAction(-1, user._id, 'Waitlisted user.');*/
 
                                     UserController.waitlistUser({_id: -1}, user._id, function(err, user) {
-                                        logger.logToConsole(err, user);
+                                        if(err){
+                                            logger.defaultLogger.error("Error waitlisting user after admit. ", err);
+                                        }
+                                        logger.defaultLogger.silly(user);
                                     })
                                 }
 
@@ -1089,7 +1076,10 @@ UserController.admitUser = function (adminUser, userID, callback) {
 
         if (!err && user) {
             TeamController.checkIfAutoAdmit(adminUser, user.teamCode, function (err, team) {
-                logger.logToConsole(err, team);
+                if(err){
+                    logger.defaultLogger.error("Error checking team auto admit after admitting user. ", err);
+                }
+                logger.defaultLogger.silly(user);
             });
         }
 
@@ -1185,11 +1175,11 @@ UserController.inviteToSlack = function (id, email, callback) {
             set_active: true
         }
     }).then(res => {
-        logger.logToConsole(res);
+        logger.defaultLogger.debug("Slack invite webhook response: ", res);
 
         return callback(null, {message: 'Success'});
     }).catch(err => {
-        logger.logToConsole("invite to slack error");
+        logger.defaultLogger.error("Error inviting user to Slack.", err);
         return callback(err);
     });
 
@@ -1222,7 +1212,7 @@ UserController.acceptInvitation = function (executeUser, confirmation, callback)
             return callback(err);
         }
 
-        logger.logToConsole(err, profileValidated)
+        logger.logConsoleDebug(err, profileValidated)
 
         // Only send email if user hasn't confirmed yet
         User.findOne({
@@ -1236,7 +1226,10 @@ UserController.acceptInvitation = function (executeUser, confirmation, callback)
 
                 if (user && !err) {
                     UserController.inviteToSlack(user._id, user.email,function(err, data){
-                        logger.logToConsole(err, data);
+                        if(err){
+                            logger.defaultLogger.error("Error attempting to invite user to Slack. ", err);
+                        }
+                        logger.defaultLogger.debug(data);
 
                     });
 

@@ -16,13 +16,12 @@ module.exports = {
             for (let team of teams) {
                 TeamController.deactivateTeam(adminUser, team.code, function(err){
                     if(err){
-                        logger.logToConsole(`Unable to deactivate team ${team.code}.`, err);
+                        logger.defaultLogger.error(`Unable to deactivate team ${team.code}.`, err);
                     }
                 }, false);
             }
 
             return callback({message: "Team deactivations queued. Check the log for any errors.", code: 200});
         })
-
     }
 }

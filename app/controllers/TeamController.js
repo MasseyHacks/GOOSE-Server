@@ -22,7 +22,9 @@ TeamController.checkAllTeams = function(adminUser, callback) {
             for (var team in teams) {
 
                 TeamController.checkIfAutoAdmit(adminUser, teams[team].code, function(err, msg) {
-                    logger.logToConsole(err, msg)
+                    if(err){
+                        logger.defaultLogger.error(err);
+                    }
                 })
             }
 
@@ -62,7 +64,7 @@ TeamController.checkIfAutoAdmit = function (adminUser, teamCode, callback) {
                 }
             }
 
-            logger.logToConsole('Team not eligable for auto admit')
+            logger.logConsoleDebug(`Team ${teamCode} not eligible for auto admit.`)
 
             return callback({ error : 'Team doesn\'t meet criteria'});
         });
@@ -70,10 +72,9 @@ TeamController.checkIfAutoAdmit = function (adminUser, teamCode, callback) {
 };
 
 TeamController.teamAccept = function(adminUser, teamCode, callback) {
-    logger.logToConsole(teamCode)
     TeamController.getByCode(teamCode, function (err, team) {
         if (err || !team) {
-            logger.logToConsole(err)
+            logger.defaultLogger.error(err)
             return callback(err);
         }
 
@@ -84,14 +85,14 @@ TeamController.teamAccept = function(adminUser, teamCode, callback) {
             if (team.memberNames[teamMember]['status']['submittedApplication'] && !team.memberNames[teamMember]['status']['admitted']) {
                 User.resetAdmissionState(adminUser, team.memberNames[teamMember].id, function (err, user) {
 
-                    logger.logToConsole('Done resetting user status', user.fullName, user)
+                    logger.logConsoleDebug('Done resetting user status', user.fullName, user)
 
                     User.admitUser(adminUser, user._id, function (err, user) {
                         if (err || !user) {
-                            logger.logToConsole(err)
+                            logger.defaultLogger.error(err)
                         }
 
-                        logger.logToConsole('Admitted user', user.fullName)
+                        logger.logConsoleDebug('Admitted user', user.fullName)
                     })
 
                 });
@@ -103,10 +104,9 @@ TeamController.teamAccept = function(adminUser, teamCode, callback) {
 };
 
 TeamController.teamReject = function(adminUser, teamCode, callback) {
-    logger.logToConsole(teamCode)
     TeamController.getByCode(teamCode, function (err, team) {
         if (err || !team) {
-            logger.logToConsole(err)
+            logger.defaultLogger.error(err)
             return callback(err);
         }
 
@@ -117,7 +117,7 @@ TeamController.teamReject = function(adminUser, teamCode, callback) {
             User.resetAdmissionState(adminUser, team.memberNames[teamMember].id, function(err, user) {
                 User.rejectUser(adminUser, user._id, function (err, user) {
                     if (err || !user) {
-                        logger.logToConsole(err)
+                        logger.defaultLogger.error(err)
                     }
                 })
             });
@@ -379,7 +379,7 @@ TeamController.removeFromTeam = function (userExcute, id, code, callback) {
         _id: id
     }, function (err, user) {
         if (err || !user) {
-            logger.logToConsole(err)
+            logger.defaultLogger.error(err)
             return callback({ error : 'User doesn\'t exist' });
         }
 
@@ -423,9 +423,9 @@ TeamController.deleteTeamByCode = function (userExcute, code, callback) {
                 code: code
             }, function (err) {
                 if (err) {
-                    return callback({error : 'Unable to delete Team'})
+                    loggger.defaultLogger.error(`Unable to delete team ${code}. `, err);
+                    return callback({error : 'Unable to delete Team'});
                 }
-                logger.logToConsole(userExcute);
                 logger.logAction(userExcute.id, -1, 'Deleted the team: ' + team.name + ' (' + code + ')', 'EXECUTOR IP: ' + userExcute.ip);
 
                 return callback(null, {message : 'Success'})
@@ -445,9 +445,8 @@ TeamController.getFields = function (userExcute, callback) {
     }
 
     fieldsOut.push({'name': "memberNames",});
-    logger.logToConsole("testing " + fieldsOut);
 
-    callback(null, fieldsOut)
+    return callback(null, fieldsOut)
 };
 
 TeamController.getByQuery = function (adminUser, query, callback) {
@@ -464,8 +463,6 @@ TeamController.getByQuery = function (adminUser, query, callback) {
     var and     = [];
     var or      = [];
     var appPage = query.appPage ? query.appPage : null;
-
-    logger.logToConsole(appPage);
 
     if (text) {
         var regex = new RegExp(escapeRegExp(text), 'i'); // filters regex chars, sets to case insensitive
@@ -490,12 +487,12 @@ TeamController.getByQuery = function (adminUser, query, callback) {
         }
     }
 
-    logger.logToConsole(filters);
+    logger.defaultLogger.debug("Running query for teams with the following filter(s): ", filters);
 
     Team.count(filters, function(err, count) {
 
         if (err) {
-            logger.logToConsole(err);
+            logger.defaultLogger.error(err);
             return callback({error:err.message})
         }
 
@@ -511,11 +508,9 @@ TeamController.getByQuery = function (adminUser, query, callback) {
             .populate('memberNames')
             .exec(function(err, teams) {
                 if (err) {
-                    logger.logToConsole(err);
+                    logger.defaultLogger.error(err);
                     return callback({error:err.message})
                 }
-
-                logger.logToConsole(teams, count, size);
 
                 for (var i = 0; i < teams.length; i++) {
                     teams[i] = TeamController.filterNames(teams[i])
@@ -570,7 +565,7 @@ TeamController.deactivateTeam = function(adminUser, code, callback, log=true){
                 },
                 function(err){
                     if(err){
-                        logger.logToConsole(`Unable to disassociate user ${member} from ${code}`, err);
+                        logger.defaultLogger.error(`Error clearing teamCode of ${member}. `, err);
                     }
                 });
         }

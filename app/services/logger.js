@@ -1,3 +1,4 @@
+const util            = require('util');
 const LogEvent        = require('../models/LogEvent');
 const axios           = require('axios');
 const winston         = require('winston');
@@ -5,6 +6,27 @@ const {LoggingWinston}= require('@google-cloud/logging-winston');
 const User            = require('../models/User');
 
 //const Raven           = require('raven');
+
+
+function transform(info, opts) {
+    const args = info[Symbol.for('splat')];
+    //console.log(info);
+    if (args) {
+        info.message = util.format(info.message, ...args)
+    }
+    else if(typeof info.message !== "string"){
+        info.message = util.format("", info.message).substr(1);
+    }
+    delete info[Symbol.for('splat')];
+    return info;
+}
+
+function utilFormatter() { return {transform}; }
+
+const myFormat = winston.format.printf(({ level, message, label, timestamp}) => {
+    return `${timestamp} [${label}] [${level.toUpperCase()}]: ${message}`;
+});
+
 function createWinstonLogger() {
     const levels = {
         error: 0,
@@ -15,9 +37,12 @@ function createWinstonLogger() {
         silly: 5
     };
     const loggingWinston = new LoggingWinston();
+
+    const loggingFormat = winston.format.combine(winston.format.timestamp(), winston.format.label({label: "GOOSE-SERVER"}), utilFormatter(), myFormat);
+
     const logger = winston.createLogger({
         level: 'info',
-        format: winston.format.combine(winston.format.timestamp(), winston.format.json()),
+        format: loggingFormat,
         defaultMeta: { service: 'user-service' },
         transports: [
             //
@@ -25,8 +50,7 @@ function createWinstonLogger() {
             // - Write all logs error (and below) to `error.log`.
             //
             new winston.transports.File({ filename: 'error.log' , level:'error', handleExceptions: true}),
-            new winston.transports.File({ filename: 'combined.log' }),
-            loggingWinston
+            new winston.transports.File({ filename: 'combined.log' })
         ]//,
         // exceptionHandlers: [
         //     new winston.transports.File({ filename: 'exceptions.log' }),
@@ -40,9 +64,14 @@ function createWinstonLogger() {
     //
     if (process.env.NODE_ENV !== 'production') {
         logger.add(new winston.transports.Console({
-            format: winston.format.simple(),
+            format: loggingFormat,
             handleExceptions: true
         }));
+    }
+
+    // Only log to StackDriver in production
+    if (process.env.NODE_ENV === 'production'){
+        logger.add(loggingWinston)
     }
     return logger;
 }
@@ -70,6 +99,9 @@ async function getLogActor(id) {
 }
 
 let Logger = {
+    constant: {
+
+    },
     defaultLogger: createWinstonLogger(),
     defaultResponse : function(req, res, responseJSON = true){
         return function(err, data){
@@ -97,7 +129,7 @@ let Logger = {
                     }*/
 
                     if (process.env.ERROR_SLACK_HOOK) {
-                        this.logToConsole('Sending slack notification...');
+                        this.logConsoleDebug('Sending slack notification...');
 
                         axios.post(process.env.ERROR_SLACK_HOOK,
                             {
@@ -112,7 +144,7 @@ let Logger = {
                                     })
                                 }
                             }
-                        ).then(() => logger.logToConsole('Message sent to slack'));
+                        ).then(() => Logger.logConsoleDebug('Message sent to slack'));
                     }
                 }
 
@@ -127,12 +159,26 @@ let Logger = {
             }
         };
     },
-    logToConsole: function logToConsole() {
+    logConsoleDebug: function(){
+        if(process.env.NODE_ENV !== 'development'){
+            return;
+        }
         let finalLog = [];
         for (let i = 0; i < arguments.length; i++) {
             finalLog.push(arguments[i]);
         }
         console.log(...finalLog)
+    },
+    logToConsole: function () {
+        let finalLog = [];
+        for (let i = 0; i < arguments.length; i++) {
+            finalLog.push(arguments[i]);
+        }
+        this.defaultLogger.info(finalLog)
+        console.log(...finalLog)
+    },
+    logGeneral: function(level, context, message){
+
     },
     logAction : async function (actionFrom, actionTo, message, detailedMessage, cb) {
         // Start bash
@@ -192,7 +238,7 @@ let Logger = {
                         .populate(actionTo === -1 ? '' : 'toUser')
                         .exec(function (err, event) {
 
-                            Logger.logToConsole(event);
+                            Logger.defaultLogger.debug(event);
 
                             if (event) {
                                 LogEvent.findOneAndUpdate({
@@ -206,14 +252,14 @@ let Logger = {
                                     new: true
                                 }, function (err, newEvent) {
 
-                                    Logger.logToConsole(newEvent);
+                                    Logger.defaultLogger.info(newEvent);
 
                                     if (cb) {
                                         cb();
                                     }
                                 })
                             } else {
-                                Logger.logToConsole('Logging fail.')
+                                Logger.defaultLogger.error('Logging fail.')
                             }
                         });
 

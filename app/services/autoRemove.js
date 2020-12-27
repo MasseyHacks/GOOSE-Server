@@ -14,7 +14,7 @@ function removeUnverifiedUser(){
         async.each(users, function (user, callback) {
             if (now - user.timestamp > 86400000){
                 logger.logAction(-1, user._id, 'Deleted user.');
-                logger.logToConsole('Removing ' + user.email);
+                logger.logConsoleDebug('Removing ' + user.email);
                 User.findOneAndRemove({'id':user.id}, callback);
             }
         })

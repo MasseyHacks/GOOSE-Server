@@ -5,7 +5,6 @@ const logger = require('../services/logger');
 require('dotenv').config();
 
 GITHUB_SECRET = process.env.GITHUB_SECRET;
-logger.logToConsole(GITHUB_SECRET);
 
 module.exports = function (router) {
     router.use(express.json());
@@ -13,24 +12,24 @@ module.exports = function (router) {
     router.post('/pull', function (req, res) {
         let sig = "sha1=" + crypto.createHmac('sha1', GITHUB_SECRET).update(JSON.stringify(req.body)).digest('hex');
 
-        logger.logToConsole(req.headers['x-hub-signature'], sig)
-        if (req.headers['x-hub-signature'] == sig) {
+        logger.logConsoleDebug(req.headers['x-hub-signature'], sig)
+        if (req.headers['x-hub-signature'] === sig) {
 
             var child = spawn('./pull.sh');
 
             child.stdout.on('data', function(data) {
-                logger.logToConsole('child stdout:\n' + data);
+                logger.logConsoleDebug('child stdout:\n' + data);
 
                 logger.logAction(-1, -1, 'Webhook source update successful. Commit: ' + req.body['head_commit']['message'], data);
             });
 
             res.send("me has pulled");
-            logger.logToConsole("I PULLED!");
+            logger.defaultLogger.info("Pulled update from GitHub.");
         } else {
             logger.logAction(-1, -1, 'Webhook source update rejected', 'IP: ' + (req.headers['x-forwarded-for'] || req.connection.remoteAddress) + ' Headers: ' + (req.rawHeaders).toString());
 
             res.send("lmao u can't do that");
-            logger.logToConsole("Pull failed.");
+            logger.defaultLogger.warn("Attempted pull trigger failed signature check.");
         }
 
         res.end();

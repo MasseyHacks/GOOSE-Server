@@ -8,7 +8,7 @@ const logger   = require('../services/logger');
 var stats = {};
 
 function calculateStats(callback) {
-    logger.logToConsole('Calculating stats...');
+    logger.defaultLogger.info('Calculating stats...');
 
     var charLength = [];
 
@@ -135,7 +135,6 @@ function calculateStats(callback) {
 
                     async.each(users, function(user, callback){
 
-                        //logger.logToConsole(newStats.votes)
 
                         for (var i = 0; i < user.applicationVotes.length; i++) {
                             if (user.applicationVotes[i] in newStats.votes) {
@@ -274,7 +273,6 @@ function calculateStats(callback) {
 
                         callback(); // let async know we've finished
                     }, function() {
-                        //logger.logToConsole(newStats.review);
 
                         newStats.avgCharLength = charLength.reduce(function(a, b) {return a + b}, 0) / charLength.length
 
@@ -299,7 +297,7 @@ function calculateStats(callback) {
                             });
                         newStats.confirmedStat.dietaryRestrictions = confirmedRestrictions;
 
-                        logger.logToConsole('Stats updated!');
+                        logger.defaultLogger.info('Stats updated!');
                         newStats.lastUpdated = new Date();
                         stats = newStats;
 

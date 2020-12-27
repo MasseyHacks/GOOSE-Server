@@ -98,7 +98,7 @@ SettingsController.getVerificationProblem = function(adminUser, callback){
 
     returnData['question'] = eq.toString();
 
-    logger.logToConsole(eq.toString());
+    logger.logConsoleDebug(eq.toString());
     try{
       returnData['answer'] = eq.solveFor(letter).toString();
     }
@@ -260,7 +260,7 @@ SettingsController.getLog = function(query, callback){
     var or     = [];
     var and    = [];
 
-    logger.logToConsole('query', query);
+    logger.logConsoleDebug('query', query);
 
     if (query.text) {
         var regex = new RegExp(escapeRegExp(query.text), 'i'); // filters regex chars, sets to case insensitive
@@ -293,7 +293,7 @@ SettingsController.getLog = function(query, callback){
 
     LogEvent.count(filter, function(err, count) {
         if (err) {
-            logger.logToConsole(err);
+            logger.defaultLogger.error("Error when attempting to count LogEvents @oqMyVF. ", err);
             return callback({error:err.message})
         }
 
@@ -309,7 +309,7 @@ SettingsController.getLog = function(query, callback){
             .exec(function (err, log) {
                 if (err || !log) {
                     if (err) {
-                        logger.logToConsole(err);
+                        logger.defaultLogger.error(err);
                         return callback({error:err.message})
                     }
                     return callback(null, {

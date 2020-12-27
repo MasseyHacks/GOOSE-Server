@@ -10,11 +10,11 @@ module.exports = {
     flushQueue : function(queue,callback){
         queue = queue.toLowerCase();
 
-        logger.logToConsole('Attempting queue flush');
+        logger.logConsoleDebug('Attempting email queue flush.');
 
         //check if the given queue is valid
         if(!queue || validTemplates[queue]['queueName'] === null || !validTemplates[queue]['canQueue']){//invalid
-            logger.logToConsole('Invalid email queue!');
+            logger.defaultLogger.error(`Invalid email queue ${queue}!`);
             return callback({error: 'Invalid email queue.'});
         }
         else{//valid
@@ -24,7 +24,7 @@ module.exports = {
                     return callback({error: 'Cannot find the email queue.'});
                 }
                 else {
-                    logger.logToConsole('Flushing Queue...', settings.emailQueue[validTemplates[queue]['queueName']]);//debug
+                    logger.defaultLogger.debug('Flushing Queue...', settings.emailQueue[validTemplates[queue]['queueName']]);
 
                     //get pending emails from database
                     var emailPendingList = settings.emailQueue[validTemplates[queue]['queueName']];
@@ -66,8 +66,6 @@ module.exports = {
                                     submitBy: submitByString
                                 };
 
-                                logger.logToConsole(dataPack.dashURL);
-
                                 //send the email
                                 mailer.sendTemplateEmail(element, queue, dataPack,emailHTML);
 
@@ -76,14 +74,17 @@ module.exports = {
                                 pullObj['emailQueue.'+validTemplates[queue]['queueName']] = element;
                                 //remove it from the queue
 
-                                logger.logToConsole(pullObj);
+                                logger.logConsoleDebug(pullObj);
 
                                 Settings.findOneAndUpdate({}, {
                                     $pull : pullObj
                                 }, {
 
                                 }, function(err, settings) {
-                                    logger.logToConsole(err, settings.emailQueue);
+                                    if(err){
+                                        logger.defaultLogger.error(`Error updaing email queue after single queue flush. `, err);
+                                    }
+                                    logger.defaultLogger.debug(`Email queue after single queue flush: `, settings.emailQueue);
                                 });
 
                             }
@@ -101,7 +102,7 @@ module.exports = {
 						$set: pushObj
 					}, {}, function(err, settings){
 						if(err){
-							logger.logToConsole(err);
+							logger.defaultLogger.error(`Error updating the last queue flush time. `, err);
 						}
 					});
 
@@ -115,7 +116,7 @@ module.exports = {
 
     flushQueueUser : function(userEmail,callback){
 
-        logger.logToConsole('Attempting user queue flush');
+        logger.defaultLogger.info(`Attempting user queue flush for ${userEmail}.`);
 
         Settings.findOne({},function(err,settings){
             if(err){
@@ -153,11 +154,10 @@ module.exports = {
                     };
                     for (var emailQueueName in settings.emailQueue) {
                         if (typeof settings.emailQueue[emailQueueName] === 'object') {
-                            //logger.logToConsole(typeof settings.emailQueue[emailQueueName]);
                             for (var i = 0; i < settings.emailQueue[emailQueueName].length; i++) {
 
                                 if (settings.emailQueue[emailQueueName][i] === userEmail) {
-                                    logger.logToConsole(emailQueueName + ' ' + settings.emailQueue[emailQueueName][i]);
+                                    logger.logConsoleDebug(emailQueueName + ' ' + settings.emailQueue[emailQueueName][i]);
                                     //mailer
                                     mailer.sendTemplateEmail(userEmail, emailQueueName.toLowerCase(), dataPack);
 
@@ -175,7 +175,10 @@ module.exports = {
                                         $pull: pullObj,
 										$set: pushObj
                                     }, {}, function (err, settings) {
-                                        logger.logToConsole(err, settings.emailQueue);
+                                        if(err){
+                                            logger.defaultLogger.error(`Error updating the global email queue after flush. `, err);
+                                        }
+                                        logger.defaultLogger.debug(`Email queue after user queue flush: `, settings.emailQueue);
 
                                         User.findOneAndUpdate({
                                                 email: userEmail
@@ -185,9 +188,9 @@ module.exports = {
                                                 }
                                             }, {},
                                             function (err, user) {
-
-                                                logger.logToConsole(err, user);
-
+                                                if(err){
+                                                    logger.defaultLogger.error(`Error while updating emailsFlushed of ${userEmail}. `, err);
+                                                }
 
                                             });
                                     });

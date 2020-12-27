@@ -123,7 +123,7 @@ schema.statics.getEmailQueueStats = function(callback) {
 			return callback(err ? err : {error: "Unable to find any email queues.", code: 500})
 		}
         const logger = require('../services/logger');
-        logger.logToConsole("settings",settings);
+
 		var emailQueue = settings.emailQueue;
 		var emailQueueLastFlushed = settings.emailQueueLastFlushed;
 		var dataPack = {total:0};
@@ -136,7 +136,7 @@ schema.statics.getEmailQueueStats = function(callback) {
 			}
 		}
 		delete dataPack["$init"];
-		logger.logToConsole("queuestats", dataPack);
+		logger.logConsoleDebug("queuestats", dataPack);
 		return callback(null, {stats: dataPack});
 	});
 };

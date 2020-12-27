@@ -292,7 +292,7 @@ module.exports = function(router) {
 
         TeamController.joinTeam(user._id, teamCode, function(err, data){
             if (err || !data) {
-                logger.logToConsole(err);
+                logger.defaultLogger.error(err);
                 return logger.defaultResponse(req, res)( err ? err : { error : 'Unable to join team' } );
             }
 
@@ -335,8 +335,6 @@ module.exports = function(router) {
         var id = req.body.id;
         var code = req.body.code;
 
-        logger.logToConsole(id, code)
-
         TeamController.removeFromTeam(user, id, code, logger.defaultResponse(req, res));
     });
 
@@ -347,11 +345,10 @@ module.exports = function(router) {
 
         var form = new formidable.IncomingForm();
 
-        logger.logToConsole(req)
+        logger.logConsoleDebug(req)
 
         form.parse(req, function (err, fields, files) {
             try {
-                //logger.logToConsole(err, fields, 'shit', files)
 
                 GridStore.write(userID, userID + '-waiver-' + files.data.name, files.data.path, function(err) {
 
@@ -360,15 +357,15 @@ module.exports = function(router) {
                     }
 
                     fs.unlink(files.data.path, function() {
-                        logger.logToConsole('Deleted temp')
+                        logger.logConsoleDebug('Deleted temp')
 
                         return logger.defaultResponse(req, res)(null, 'ok');
                     })
                 });
 
             } catch (e) {
+                logger.defaultLogger.error(e)
                 return logger.defaultResponse(req, res)({ error : 'Something went wrong' });
-                logger.logToConsole(e)
             }
         });
     });

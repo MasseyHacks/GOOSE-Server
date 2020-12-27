@@ -76,7 +76,7 @@ globalUsersManager.pushBackRejected = function(adminUser, callback){
                             'emailQueue.rejected': user.email
                         }
                     }, function (a, b) {
-                        logger.logToConsole('Ha! Gottem')
+                        logger.logConsoleDebug(`Pushed ${user._id} back.`)
                     })
 
 
@@ -85,7 +85,7 @@ globalUsersManager.pushBackRejected = function(adminUser, callback){
         }
 
 
-        logger.logAction(adminUser._id, -1, 'Unrejected all rejected users without status release', 'EXECUTOR IP: ' + adminUser.ip);
+        logger.logAction(adminUser._id, -1, 'Unrejected all rejected users without status release.', 'EXECUTOR IP: ' + adminUser.ip);
 
         return callback(err, result.nModified);
 
@@ -108,7 +108,7 @@ globalUsersManager.queueLagger = function(adminUser, callback){
     }, function(err, users) {
 
 
-        logger.logToConsole('laggerconf', users)
+        logger.logConsoleDebug('laggerconf', users)
 
         for (var i = 0; i < users.length; i++) {
 
@@ -131,7 +131,7 @@ globalUsersManager.queueLagger = function(adminUser, callback){
         'permissions.checkin': false
     }, function(err, users) {
 
-        logger.logToConsole('laggerapps', users)
+        logger.logConsoleDebug('laggerapps', users)
 
         for (var i = 0; i < users.length; i++) {
 
@@ -157,7 +157,7 @@ globalUsersManager.queueLagger = function(adminUser, callback){
         'status.waiver': false
     }, function(err, users) {
 
-        logger.logToConsole('laggerwaiver', users)
+        logger.logConsoleDebug('laggerwaiver', users)
 
         for (var i = 0; i < users.length; i++) {
 
@@ -285,14 +285,18 @@ globalUsersManager.hideAllStatusRelease = function(adminUser, callback){
 
 globalUsersManager.flushAllEmails = function (adminUser, callback) {
     User.find({}, function (err, users) {
-        //logger.logToConsole('Users to be flushed.', users, err);
+        logger.defaultLogger.debug('Users to be flushed.', users, err);
 
         logger.logAction(adminUser._id, -1, 'Flushed all emails from queue.', 'EXECUTOR IP: ' + adminUser.ip);
 
         async.each(users, function (user, callback) {
             UserController.flushEmailQueue(adminUser, user._id, (err, msg) => {
-                logger.logToConsole(user.fullName, err, msg ? 'Success' : 'Fail');
-
+                if(err){
+                    logger.defaultLogger.error(`Error flushing all emails for user ${user._id}. `, err, msg);
+                }
+                else{
+                    logger.defaultLogger.info(`Flushed email queue for ${user._id} successfully. `, msg);
+                }
                 return callback()
             });
 

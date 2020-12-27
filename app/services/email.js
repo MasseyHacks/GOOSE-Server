@@ -33,7 +33,7 @@ module.exports = {
         const logger     = require('../services/logger');
         console.log('logger' + logger.test());
         templateName = templateName.toLowerCase();
-        logger.logToConsole('Sending template email! to:' +recipient+ ' template '+templateName+' dp '+dataPack);
+        logger.logConsoleDebug('Sending template email! to:' +recipient+ ' template '+templateName+' dp '+dataPack);
         if(validTemplates[templateName]['queueName']){
             //compile the template
 
@@ -54,7 +54,7 @@ module.exports = {
             //start sending
             transporter.verify(function(error, success) {//verify the connection
                 if (error) {
-                    logger.logToConsole(error);
+                    logger.defaultLogger.error("Error verifying email connection. "error);
                 }
             });
 
@@ -68,10 +68,10 @@ module.exports = {
 
             transporter.sendMail(email_message, function(error,response){//send the email
                 if(error){
-                    logger.logToConsole(error,response);
+                    logger.defaultLogger.error("Error while attempting to send a template email. ", error,response);
                 }
                 else{
-                    logger.logToConsole('email sent');
+                    logger.logConsoleDebug('Email sent.');
                 }
             });
         }
@@ -83,7 +83,6 @@ module.exports = {
 
         //check if the given queue is valid
         if(validTemplates[queue] === null){//invalid
-            logger.logToConsole('Invalid email queue!');
             return callback({error: 'Invalid email queue.'});
         }
         else{//valid
@@ -97,7 +96,7 @@ module.exports = {
                 new: true
             }, function(err,settings){
                 if(err){
-                    logger.logToConsole(err);
+                    logger.defaultLogger.error(err);
                     return callback({error: 'Cannot add email to the queue.'});
                 }
                 else{
@@ -112,7 +111,6 @@ module.exports = {
     returnTemplate : function(templateName,callback){
         templateName = templateName.toLowerCase();
         if(!templateName || validTemplates[templateName] == null){//invalid
-            logger.logToConsole('Invalid email queue!');
             return callback({error: 'Invalid email template!'});
         }
         else{
@@ -136,7 +134,6 @@ module.exports = {
     setTemplate : function(templateName,templateBody,callback){
         templateName = templateName.toLowerCase();
         if(!templateName || validTemplates[templateName] == null){//invalid
-            logger.logToConsole('Invalid email queue!');
             return callback('Invalid email template!');
         }
         else{

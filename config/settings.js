@@ -16,7 +16,7 @@ Settings.findOne({}, function(err, settings){
             }, function(err) {
                 if (err) throw err;
 
-                logger.logToConsole('Settings created.');
+                logger.defaultLogger.info('Settings created.');
             });
         });
     }

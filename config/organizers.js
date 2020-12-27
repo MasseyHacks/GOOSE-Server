@@ -5,7 +5,7 @@ const mailer         = require('../app/services/email');
 const organizers     = JSON.parse(fs.readFileSync('config/data/organizers.json', 'utf8'));
 const logger         = require('../app/services/logger');
 
-logger.logToConsole('Trying to add organizers');
+logger.defaultLogger.info("Trying to add organizers.");
 
 for(const key in organizers) {
     email      = organizers[key]['email'];
@@ -16,10 +16,14 @@ for(const key in organizers) {
     makeOrganizer(email, firstName, lastName, permission);
 }
 
+function sleep(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms));
+}
+
 function makeOrganizer(email, firstName, lastName,  permission) {
-        User.getByEmail(email, function (err, user) {
+        User.getByEmail(email, async function (err, user) {
             if (!user) {
-                logger.logToConsole('Adding: ', email, firstName, lastName, permission);
+                logger.logConsoleDebug('Adding: ', email, firstName, lastName, permission);
 
                 var password = "";
                 var suspension = true;
@@ -28,7 +32,8 @@ function makeOrganizer(email, firstName, lastName,  permission) {
                     password = "123456";
                     suspension = false;
                 }
-
+                console.log("STOP MOGNO");
+                await sleep(3000);
                 User.create({
                     'email': email,
                     'firstName': firstName,
@@ -62,7 +67,7 @@ function makeOrganizer(email, firstName, lastName,  permission) {
                             {
                                 new: true
                             }, function (err, user) {
-                                logger.logToConsole(userNew.email + ': ' + process.env.FRONTEND_URL + '/magic?token=' + token);
+                                logger.logConsoleDebug(userNew.email + ': ' + process.env.FRONTEND_URL + '/magic?token=' + token);
                                 //send the email
                                 if (process.env.NODE_ENV !== 'development') {
                                     mailer.sendTemplateEmail(user.email, 'magiclinkemails', {
@@ -77,9 +82,9 @@ function makeOrganizer(email, firstName, lastName,  permission) {
                     if (process.env.NODE_ENV !== 'development') {
                         UserController.sendPasswordResetEmail(email, function (err) {
                             if (err) {
-                                logger.logToConsole(err);
+                                logger.defaultLogger.error("Error sending initial organizer password reset email. ", err);
                             } else {
-                                logger.logToConsole('Email successful.');
+                                logger.defaultLogger.debug('Initial organizer password reset email sent successfully.');
                             }
                         });
                     }

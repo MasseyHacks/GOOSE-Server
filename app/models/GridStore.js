@@ -28,7 +28,7 @@ module.exports = {
             fs.createReadStream(path).pipe(writestream);
 
             writestream.on('close', (file) => {
-                logger.logToConsole('Stored File: ' + file.filename);
+                logger.logConsoleDebug('Stored File: ' + file.filename);
                 return callback(null)
             });
 
@@ -73,7 +73,7 @@ module.exports = {
             else {
 
                 gfs.files.findOne({filename: payload.filename}, (err, file) => {
-                    logger.logToConsole(err, file)
+                    logger.logConsoleDebug(err, file)
 
                     if (err || !file) {
                         res.status(404).send('File Not Found');
