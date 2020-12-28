@@ -36,7 +36,6 @@ function createWinstonLogger() {
         debug: 4,
         silly: 5
     };
-    const loggingWinston = new LoggingWinston();
 
     const loggingFormat = winston.format.combine(winston.format.timestamp(), winston.format.label({label: "GOOSE-SERVER"}), utilFormatter(), myFormat);
 
@@ -63,6 +62,7 @@ function createWinstonLogger() {
     // `${info.level}: ${info.message} JSON.stringify({ ...rest }) `
     //
     if (process.env.NODE_ENV !== 'production') {
+        const loggingWinston = new LoggingWinston();
         logger.add(new winston.transports.Console({
             format: loggingFormat,
             handleExceptions: true
@@ -129,7 +129,7 @@ let Logger = {
                     }*/
 
                     if (process.env.ERROR_SLACK_HOOK) {
-                        this.logConsoleDebug('Sending slack notification...');
+                        Logger.defaultLogger.debug('Sending slack notification...');
 
                         axios.post(process.env.ERROR_SLACK_HOOK,
                             {
@@ -144,7 +144,7 @@ let Logger = {
                                     })
                                 }
                             }
-                        ).then(() => Logger.logConsoleDebug('Message sent to slack'));
+                        ).then(() => logger.defaultLogger.debug('Message sent to slack'));
                     }
                 }
 
@@ -158,27 +158,6 @@ let Logger = {
                 }
             }
         };
-    },
-    logConsoleDebug: function(){
-        if(process.env.NODE_ENV !== 'development'){
-            return;
-        }
-        let finalLog = [];
-        for (let i = 0; i < arguments.length; i++) {
-            finalLog.push(arguments[i]);
-        }
-        console.log(...finalLog)
-    },
-    logToConsole: function () {
-        let finalLog = [];
-        for (let i = 0; i < arguments.length; i++) {
-            finalLog.push(arguments[i]);
-        }
-        this.defaultLogger.info(finalLog)
-        console.log(...finalLog)
-    },
-    logGeneral: function(level, context, message){
-
     },
     logAction : async function (actionFrom, actionTo, message, detailedMessage, cb) {
         // Start bash

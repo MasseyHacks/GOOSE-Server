@@ -345,7 +345,7 @@ module.exports = function(router) {
 
         var form = new formidable.IncomingForm();
 
-        logger.logConsoleDebug(req)
+        logger.defaultLogger.debug(req)
 
         form.parse(req, function (err, fields, files) {
             try {
@@ -357,7 +357,7 @@ module.exports = function(router) {
                     }
 
                     fs.unlink(files.data.path, function() {
-                        logger.logConsoleDebug('Deleted temp')
+                        logger.defaultLogger.debug('Deleted temp')
 
                         return logger.defaultResponse(req, res)(null, 'ok');
                     })

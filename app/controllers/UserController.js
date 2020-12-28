@@ -37,13 +37,13 @@ UserController.rejectNoState = function (adminUser, callback) {
         'status.rejected': false,
         'status.waitlisted': false
     }, function (err, users) {
-        logger.logConsoleDebug('Users to be rejected', users, err);
+        logger.defaultLogger.debug('Users to be rejected', users, err);
 
         logger.logAction(adminUser._id, -1, 'Rejected everyone without state.', 'EXECUTOR IP: ' + adminUser.ip);
 
         async.each(users, function (user, callback) {
             UserController.rejectUser(adminUser, user._id, (err, msg) => {
-                logger.logConsoleDebug(user.fullName, err, msg ? 'Success' : 'Fail');
+                logger.defaultLogger.debug(user.fullName, err, msg ? 'Success' : 'Fail');
 
                 return callback()
             })
@@ -158,7 +158,7 @@ UserController.getByQuery = function (adminUser, query, callback) {
         }
     }
     const logger = require('../services/logger');
-    logger.logConsoleDebug(sort);
+    logger.defaultLogger.debug(sort);
 
     User.count(filters, function (err, count) {
 
@@ -191,7 +191,7 @@ UserController.getByQuery = function (adminUser, query, callback) {
 
                         return cb()
                     }, (err) => {
-                        logger.logConsoleDebug("FINISHED ASYNC USER FIND");
+                        logger.defaultLogger.debug("FINISHED ASYNC USER FIND");
                         if (err) {
                             // console.log('196', err);
                             logger.defaultLogger.error(err);
@@ -231,7 +231,7 @@ UserController.verify = function (token, callback, ip) {
 
     jwt.verify(token, JWT_SECRET, function (err, payload) {
         if (err || !payload) {
-            logger.logConsoleDebug('Verify token invalid.');
+            logger.defaultLogger.debug('Verify token invalid.');
             return callback({
                 error: 'Invalid Token',
                 code: 401
@@ -277,7 +277,7 @@ UserController.magicLogin = function (token, callback, ip) {
 
     jwt.verify(token, JWT_SECRET, function (err, payload) {
         if (err || !payload) {
-            logger.logConsoleDebug('Magic login token invalid.');
+            logger.defaultLogger.debug('Magic login token invalid.');
             return callback({
                 error: 'Invalid Token',
                 code: 401
@@ -302,7 +302,7 @@ UserController.magicLogin = function (token, callback, ip) {
                 });
             }
 
-            logger.logConsoleDebug("Logging in user via magic:", user);
+            logger.defaultLogger.debug("Logging in user via magic:", user);
             if (token === user.magicJWT) {
                 User.findOneAndUpdate({
                         _id: payload.id
@@ -357,7 +357,7 @@ UserController.sendVerificationEmail = function (token, callback, ip) {
 
         logger.logAction(user._id, user._id, 'Requested a verification email.', 'IP: ' + ip);
 
-        logger.logConsoleDebug(verificationURL);
+        logger.defaultLogger.debug(verificationURL);
 
         //send the email
         mailer.sendTemplateEmail(user.email, 'verifyemails', {
@@ -467,7 +467,7 @@ UserController.resetPassword = function (token, password, callback, ip) {
 
     jwt.verify(token, JWT_SECRET, function (err, payload) {
         if (err || !payload) {
-            logger.logConsoleDebug('Password reset token invalid.');
+            logger.defaultLogger.debug('Password reset token invalid.');
             return callback({
                 error: 'Invalid Token',
                 code: 401
@@ -525,7 +525,7 @@ UserController.sendPasswordResetEmail = function (email, callback, ip) {
 
             logger.logAction(user._id, user._id, 'Requested a password reset email.', 'IP: ' + ip);
 
-            logger.logConsoleDebug(resetURL);
+            logger.defaultLogger.debug(resetURL);
             mailer.sendTemplateEmail(email, 'passwordresetemails', {
                 nickname: user.firstName,
                 resetUrl: resetURL
@@ -608,7 +608,7 @@ UserController.createUser = function (email, firstName, lastName, password, call
                             var token = user.generateAuthToken();
                             var verificationURL = process.env.FRONTEND_URL + '/verify/' + user.generateVerificationToken();
 
-                            logger.logConsoleDebug("Verification URL: ", verificationURL);
+                            logger.defaultLogger.debug("Verification URL: ", verificationURL);
 
                             mailer.sendTemplateEmail(user.email, 'verifyemails', {
                                 nickname: user.firstName,
@@ -765,7 +765,7 @@ UserController.updateProfile = function (userExecute, id, profile, callback) {
 
     // Validate the user profile, and mark the user as profile completed
     // when successful.
-    logger.logConsoleDebug('Updating profile' + profile);
+    logger.defaultLogger.debug('Updating profile' + profile);
 
     User.getByID(id, function(err, validationUser) {
         // Already submitted
@@ -979,7 +979,7 @@ UserController.checkAdmissionStatus = function (id) {
                         Settings.findOne({}, function (err, settings) {
 
                             if (err || !settings) {
-                                logger.logToConsole('Unable to get settings while attempting to admit user.', err);
+                                logger.defaultLogger.error('Unable to get settings while attempting to admit user. ', err);
                                 return;
                             }
 
@@ -1212,7 +1212,7 @@ UserController.acceptInvitation = function (executeUser, confirmation, callback)
             return callback(err);
         }
 
-        logger.logConsoleDebug(err, profileValidated)
+        logger.defaultLogger.debug(err, profileValidated)
 
         // Only send email if user hasn't confirmed yet
         User.findOne({

@@ -64,7 +64,7 @@ TeamController.checkIfAutoAdmit = function (adminUser, teamCode, callback) {
                 }
             }
 
-            logger.logConsoleDebug(`Team ${teamCode} not eligible for auto admit.`)
+            logger.defaultLogger.debug(`Team ${teamCode} not eligible for auto admit.`)
 
             return callback({ error : 'Team doesn\'t meet criteria'});
         });
@@ -85,14 +85,14 @@ TeamController.teamAccept = function(adminUser, teamCode, callback) {
             if (team.memberNames[teamMember]['status']['submittedApplication'] && !team.memberNames[teamMember]['status']['admitted']) {
                 User.resetAdmissionState(adminUser, team.memberNames[teamMember].id, function (err, user) {
 
-                    logger.logConsoleDebug('Done resetting user status', user.fullName, user)
+                    logger.defaultLogger.debug('Done resetting user status', user.fullName, user)
 
                     User.admitUser(adminUser, user._id, function (err, user) {
                         if (err || !user) {
                             logger.defaultLogger.error(err)
                         }
 
-                        logger.logConsoleDebug('Admitted user', user.fullName)
+                        logger.defaultLogger.debug('Admitted user', user.fullName)
                     })
 
                 });

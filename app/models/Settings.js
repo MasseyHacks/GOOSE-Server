@@ -136,7 +136,7 @@ schema.statics.getEmailQueueStats = function(callback) {
 			}
 		}
 		delete dataPack["$init"];
-		logger.logConsoleDebug("queuestats", dataPack);
+		logger.defaultLogger.debug("queuestats", dataPack);
 		return callback(null, {stats: dataPack});
 	});
 };

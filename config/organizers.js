@@ -23,7 +23,7 @@ function sleep(ms) {
 function makeOrganizer(email, firstName, lastName,  permission) {
         User.getByEmail(email, async function (err, user) {
             if (!user) {
-                logger.logConsoleDebug('Adding: ', email, firstName, lastName, permission);
+                logger.defaultLogger.debug('Adding: ', email, firstName, lastName, permission);
 
                 var password = "";
                 var suspension = true;
@@ -67,7 +67,7 @@ function makeOrganizer(email, firstName, lastName,  permission) {
                             {
                                 new: true
                             }, function (err, user) {
-                                logger.logConsoleDebug(userNew.email + ': ' + process.env.FRONTEND_URL + '/magic?token=' + token);
+                                logger.defaultLogger.debug(userNew.email + ': ' + process.env.FRONTEND_URL + '/magic?token=' + token);
                                 //send the email
                                 if (process.env.NODE_ENV !== 'development') {
                                     mailer.sendTemplateEmail(user.email, 'magiclinkemails', {

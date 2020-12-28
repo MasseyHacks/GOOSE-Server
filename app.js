@@ -78,5 +78,5 @@ app.use('/payment', paymentRouter);
 
 app.listen(port, () => {
     // logger.logToConsole(`listening on port ${port}`);
-    logger.defaultLogger.info(`listening on port ${port}`)
+    logger.defaultLogger.info(`Listening on port ${port}`)
 });

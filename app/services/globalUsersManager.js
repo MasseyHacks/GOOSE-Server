@@ -76,7 +76,7 @@ globalUsersManager.pushBackRejected = function(adminUser, callback){
                             'emailQueue.rejected': user.email
                         }
                     }, function (a, b) {
-                        logger.logConsoleDebug(`Pushed ${user._id} back.`)
+                        logger.defaultLogger.debug(`Pushed ${user._id} back.`)
                     })
 
 
@@ -108,7 +108,7 @@ globalUsersManager.queueLagger = function(adminUser, callback){
     }, function(err, users) {
 
 
-        logger.logConsoleDebug('laggerconf', users)
+        logger.defaultLogger.debug('laggerconf', users)
 
         for (var i = 0; i < users.length; i++) {
 
@@ -131,7 +131,7 @@ globalUsersManager.queueLagger = function(adminUser, callback){
         'permissions.checkin': false
     }, function(err, users) {
 
-        logger.logConsoleDebug('laggerapps', users)
+        logger.defaultLogger.debug('laggerapps', users)
 
         for (var i = 0; i < users.length; i++) {
 
@@ -157,7 +157,7 @@ globalUsersManager.queueLagger = function(adminUser, callback){
         'status.waiver': false
     }, function(err, users) {
 
-        logger.logConsoleDebug('laggerwaiver', users)
+        logger.defaultLogger.debug('laggerwaiver', users)
 
         for (var i = 0; i < users.length; i++) {
 

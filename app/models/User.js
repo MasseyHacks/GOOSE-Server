@@ -50,14 +50,14 @@ schema.methods.generateResetToken = function () {
 
 schema.methods.setPermission = function (level) {
     const logger = require('../services/logger');
-    logger.logConsoleDebug('Got level ', level);
+    logger.defaultLogger.debug('Got level ', level);
 
     if (level && typeof level == 'string') {
         for (var key in fields['permissions']) {
 
             if (key == level.toLowerCase()) {
 
-                logger.logConsoleDebug('Locked to', key);
+                logger.defaultLogger.debug('Locked to', key);
 
                 level = fields['permissions'][key]['permissionLevel'];
                 break
@@ -65,7 +65,7 @@ schema.methods.setPermission = function (level) {
         }
     }
 
-    logger.logConsoleDebug('Translating to ', level);
+    logger.defaultLogger.debug('Translating to ', level);
 
     if (!level) {
         level = 0
@@ -79,10 +79,10 @@ schema.methods.setPermission = function (level) {
         permissions: this.permissions
     }, function (err, user) {
         if (err || !user) {
-            logger.logConsoleDebug('Failed to set permission')
+            logger.defaultLogger.debug('Failed to set permission')
         }
 
-        logger.logConsoleDebug('Permission set')
+        logger.defaultLogger.debug('Permission set')
     });
 };
 
@@ -153,7 +153,7 @@ schema.statics.resetAdmissionState = function (adminUser, userID, callback) {
 
 schema.statics.admitUser = function (adminUser, userID, callback) {
     const logger = require('../services/logger');
-    logger.logConsoleDebug('Trying to admit', userID);
+    logger.defaultLogger.debug('Trying to admit', userID);
 
     if (!adminUser || !userID) {
         return callback({error: 'Invalid arguments'});
@@ -179,7 +179,7 @@ schema.statics.admitUser = function (adminUser, userID, callback) {
             new: true
         }, function (err, user) {
 
-            logger.logConsoleDebug('Returned user:', user)
+            logger.defaultLogger.debug('Returned user:', user)
 
             if (err || !user) {
                 return callback(err ? err : {error: 'Unable to perform action.', code: 400})
@@ -323,7 +323,7 @@ schema.statics.getByEmail = function (email, callback, permissionLevel) {
 
 schema.statics.validateProfile = function (profile, callback) {
     const logger = require('../services/logger');
-    logger.logConsoleDebug('Validating profile!');
+    logger.defaultLogger.debug('Validating profile!');
     try {
         var queue = [[fields.profile, profile]];
         var runner;
@@ -398,7 +398,7 @@ schema.statics.validateProfile = function (profile, callback) {
         }
         const logger = require('../services/logger');
 
-        logger.logConsoleDebug('Profile accepted!')
+        logger.defaultLogger.debug('Profile accepted!')
 
         return callback(null, profile);
     } catch (e) {
@@ -547,7 +547,7 @@ var filterSensitive = function (user, permission, page) {
 
     try {
         const logger = require('../services/logger');
-        logger.logConsoleDebug(page);
+        logger.defaultLogger.debug(page);
         if (page === 'checkin') {
             return {
                 id: user.id,
@@ -575,7 +575,7 @@ var filterSensitive = function (user, permission, page) {
         var userpath;
         var keys;
 
-        logger.logConsoleDebug('Permission level:', permissionLevel)
+        logger.defaultLogger.debug('Permission level:', permissionLevel)
 
         while (queue.length !== 0) {
             runner = queue[0][0];

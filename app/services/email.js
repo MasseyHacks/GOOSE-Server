@@ -33,7 +33,7 @@ module.exports = {
         const logger     = require('../services/logger');
         console.log('logger' + logger.test());
         templateName = templateName.toLowerCase();
-        logger.logConsoleDebug('Sending template email! to:' +recipient+ ' template '+templateName+' dp '+dataPack);
+        logger.defaultLogger.debug('Sending template email! to:' +recipient+ ' template '+templateName+' dp '+dataPack);
         if(validTemplates[templateName]['queueName']){
             //compile the template
 
@@ -54,7 +54,7 @@ module.exports = {
             //start sending
             transporter.verify(function(error, success) {//verify the connection
                 if (error) {
-                    logger.defaultLogger.error("Error verifying email connection. "error);
+                    logger.defaultLogger.error("Error verifying email connection. ", error);
                 }
             });
 
@@ -71,7 +71,7 @@ module.exports = {
                     logger.defaultLogger.error("Error while attempting to send a template email. ", error,response);
                 }
                 else{
-                    logger.logConsoleDebug('Email sent.');
+                    logger.defaultLogger.debug('Email sent.');
                 }
             });
         }

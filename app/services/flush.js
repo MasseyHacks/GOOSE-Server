@@ -10,7 +10,7 @@ module.exports = {
     flushQueue : function(queue,callback){
         queue = queue.toLowerCase();
 
-        logger.logConsoleDebug('Attempting email queue flush.');
+        logger.defaultLogger.debug('Attempting email queue flush.');
 
         //check if the given queue is valid
         if(!queue || validTemplates[queue]['queueName'] === null || !validTemplates[queue]['canQueue']){//invalid
@@ -74,7 +74,7 @@ module.exports = {
                                 pullObj['emailQueue.'+validTemplates[queue]['queueName']] = element;
                                 //remove it from the queue
 
-                                logger.logConsoleDebug(pullObj);
+                                logger.defaultLogger.debug(pullObj);
 
                                 Settings.findOneAndUpdate({}, {
                                     $pull : pullObj
@@ -157,7 +157,7 @@ module.exports = {
                             for (var i = 0; i < settings.emailQueue[emailQueueName].length; i++) {
 
                                 if (settings.emailQueue[emailQueueName][i] === userEmail) {
-                                    logger.logConsoleDebug(emailQueueName + ' ' + settings.emailQueue[emailQueueName][i]);
+                                    logger.defaultLogger.debug(emailQueueName + ' ' + settings.emailQueue[emailQueueName][i]);
                                     //mailer
                                     mailer.sendTemplateEmail(userEmail, emailQueueName.toLowerCase(), dataPack);
 
