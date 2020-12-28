@@ -574,6 +574,9 @@ TeamController.deactivateTeam = function(adminUser, code, callback, log=true){
 }
 
 TeamController.addPoints = function(adminUser, code, amount, notes, callback) {
+    if(isNaN(amount) || (amount * 10)%10 !== 0){
+        return callback({error: "Points award amount is not a whole number!", clean: true, code: 400})
+    }
     Team.findOne({code: code}).select("memberIDs").exec(function(err, team){
         if(err){
             logger.defaultLogger.error(`Error fetching team while attempting to add points to team. `, err);
@@ -585,7 +588,7 @@ TeamController.addPoints = function(adminUser, code, amount, notes, callback) {
         for(let member of team.memberIDs){
             User.addPoints(adminUser, member, amount, notes, function(err, msg) {
                 if(err){
-                    logger.defaultLogger.error(`Error adding points to user ${id} while attempting to add points to team. `, err);
+                    logger.defaultLogger.error(`Error adding points to user ${member} while attempting to add points to team. `, err);
                     return;
                 }
                 logger.logAction(adminUser._id, member, "Added points to user.", `${amount} points. Notes: ${notes}`);

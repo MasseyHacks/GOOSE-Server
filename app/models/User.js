@@ -562,6 +562,7 @@ schema.virtual('points.total').get(function() {
     for (let pointInfo of this.points.history){
         acc += pointInfo.amount;
     }
+    return acc;
 });
 
 schema.statics.filterSensitive = function (user, permission, page) {
