@@ -29,6 +29,18 @@ module.exports = function(router) {
     router.use(express.json());
 
     // Admin
+    // Award points to a team
+    router.post('/awardTeamPoints', permissions.isAdmin, function(req, res){
+        TeamController.addPoints(req.userExecute, req.body.code, req.body.amount, req.body.notes, logger.defaultResponse(req, res));
+    })
+
+    // Admin
+    // Award points to a user
+    router.post('/awardUserPoints', permissions.isAdmin, function(req, res){
+        UserController.addPoints(req.userExecute, req.body.id, req.body.amount, req.body.notes, logger.defaultResponse(req, res));
+    })
+
+    // Admin
     // Deactivate all teams
     router.post('/deactivateAllTeams', permissions.isOwner, function(req, res){
         bulkModifyTeams.deactivateAll(req.userExecute, logger.defaultResponse(req, res));

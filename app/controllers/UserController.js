@@ -28,6 +28,17 @@ function escapeRegExp(str) {
     return str.replace(/[\-\[\]\/\{\}\(\)\*\+\?\.\\\^\$\|]/g, '\\$&');
 }
 
+UserController.addPoints = function (adminUser, id, amount, notes, callback) {
+    User.addPoints(adminUser, id, amount, notes, function(err, msg) {
+        if(err){
+            logger.defaultLogger.error(`Error adding points to user ${id}. `, err);
+            return callback(err);
+        }
+        logger.logAction(adminUser._id, id, "Added points to user.", `${amount} points. Notes: ${notes}`);
+        return callback(err, "Added points to user.");
+    });
+};
+
 UserController.rejectNoState = function (adminUser, callback) {
     User.find({
         'status.submittedApplication': true,

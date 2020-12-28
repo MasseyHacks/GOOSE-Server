@@ -2,7 +2,6 @@ const Team           = require('../models/Team');
 const User           = require('../models/User');
 const TeamFields     = require('../models/data/TeamFields');
 const Settings       = require('../models/Settings');
-const UserController = require('./UserController');
 
 const logger         = require('../services/logger');
 const uuidv4         = require('uuid/v4');
@@ -572,6 +571,28 @@ TeamController.deactivateTeam = function(adminUser, code, callback, log=true){
         return callback(null, "Team deactivation has been queued. Please check the logs for any errors.");
     })
 
+}
+
+TeamController.addPoints = function(adminUser, code, amount, notes, callback) {
+    Team.findOne({code: code}).select("memberIDs").exec(function(err, team){
+        if(err){
+            logger.defaultLogger.error(`Error fetching team while attempting to add points to team. `, err);
+            return callback(err);
+        }
+
+        logger.logAction(adminUser._id, -1, "Added points to team.", `${amount} points. Notes: ${notes}`);
+
+        for(let member of team.memberIDs){
+            User.addPoints(adminUser, member, amount, notes, function(err, msg) {
+                if(err){
+                    logger.defaultLogger.error(`Error adding points to user ${id} while attempting to add points to team. `, err);
+                    return;
+                }
+                logger.logAction(adminUser._id, member, "Added points to user.", `${amount} points. Notes: ${notes}`);
+            });
+        }
+        return callback(null, "Team points awarding queued.");
+    })
 }
 
 module.exports = TeamController;

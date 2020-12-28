@@ -62,15 +62,16 @@ function createWinstonLogger() {
     // `${info.level}: ${info.message} JSON.stringify({ ...rest }) `
     //
     if (process.env.NODE_ENV !== 'production') {
-        const loggingWinston = new LoggingWinston();
         logger.add(new winston.transports.Console({
             format: loggingFormat,
+            level: 'silly',
             handleExceptions: true
         }));
     }
 
     // Only log to StackDriver in production
     if (process.env.NODE_ENV === 'production'){
+        const loggingWinston = new LoggingWinston();
         logger.add(loggingWinston)
     }
     return logger;

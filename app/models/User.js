@@ -411,6 +411,31 @@ schema.statics.validateProfile = function (profile, callback) {
     }
 };
 
+schema.statics.addPoints = function(adminUser, id, amount, notes, callback){
+    this.findOneAndUpdate(
+        {
+            _id: id
+        },
+        {
+            $push: {
+                'points.history': {
+                    amount: amount,
+                    awardedBy: adminUser._id,
+                    notes: notes
+                }
+            }
+        },
+        {
+            new: true
+        },
+        function(err, user){
+            if(err){
+                return callback(err);
+            }
+
+            return callback(null, "Added points to user successfully.");
+        });
+}
 
 schema.virtual('lowerCaseName').get(function () {
     if (this.firstName && this.lastName) {
@@ -535,7 +560,7 @@ schema.virtual('profile.isSigned').get(function () {
 schema.virtual('points.total').get(function() {
     let acc = 0;
     for (let pointInfo of this.points.history){
-        acc += pointInfo.points;
+        acc += pointInfo.amount;
     }
 });
 

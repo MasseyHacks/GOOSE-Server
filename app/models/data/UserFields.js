@@ -4,6 +4,7 @@ const mongoose          = require('mongoose');
 const bcrypt            = require('bcrypt');
 const validator         = require('validator');
 const jwt               = require('jsonwebtoken');
+const pointsEntryFields = require('./PointsEntryFields');
 
 const UNVERIFIED_HACKER = 0;
 const HACKER            = 1;
@@ -15,6 +16,8 @@ const DEVELOPER         = 6;
 const INTERNAL          = 99999;
 
 JWT_SECRET = process.env.JWT_SECRET;
+
+let pointsSchema = new mongoose.Schema(pointsEntryFields);
 
 var status = {
     active: {
@@ -558,7 +561,7 @@ var schema = {
     profile: profile,
     points: {
         history : {
-            type: [Object]
+            type: [pointsEntryFields]
         }
     }
 };
