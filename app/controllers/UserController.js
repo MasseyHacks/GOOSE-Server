@@ -29,6 +29,10 @@ function escapeRegExp(str) {
 }
 
 UserController.addPoints = function (adminUser, id, amount, notes, callback) {
+    if(!adminUser || !id){
+        return callback({error: 'Invalid arguments.', clean: true, code: 400});
+    }
+
     if(isNaN(amount) || (amount * 10)%10 !== 0){
         return callback({error: "Points award amount is not a whole number!", clean: true, code: 400})
     }
@@ -43,6 +47,10 @@ UserController.addPoints = function (adminUser, id, amount, notes, callback) {
 };
 
 UserController.rejectNoState = function (adminUser, callback) {
+    if(!adminUser){
+        return callback({error: 'Invalid arguments.', clean: true, code: 400});
+    }
+
     User.find({
         'status.submittedApplication': true,
         'permissions.checkin': false,
@@ -68,6 +76,9 @@ UserController.rejectNoState = function (adminUser, callback) {
 };
 
 UserController.modifyUser = function (adminUser, userID, data, callback) {
+    if(!adminUser || !userID || !data) {
+        return callback({error: 'Invalid arguments.', clean: true, code: 400});
+    }
     User.findOneAndUpdate({
             _id: userID
         },
@@ -88,8 +99,11 @@ UserController.modifyUser = function (adminUser, userID, data, callback) {
 };
 
 UserController.getUserFields = function (userExecute, userview, callback) {
+    if(!userExecute || !userview){
+        return callback({error: 'Invalid arguments.', clean: true, code: 400});
+    }
 
-    userview = userview['userview'] == 'true'
+    userview = userview['userview'] === 'true'
 
     if (userview) {
         var fieldsOut = {};
@@ -132,8 +146,8 @@ UserController.getUserFields = function (userExecute, userview, callback) {
 
 UserController.getByQuery = function (adminUser, query, callback) {
 
-    if (!query || !query.page || (!query.size && (query.size && query.size !== 0))) {
-        return callback({error: 'Invalid arguments'});
+    if (!adminUser || !query || !query.page || (!query.size && (query.size && query.size !== 0))) {
+        return callback({error: 'Invalid arguments.', clean: true, code: 400});
     }
 
     var page = parseInt(query.page);
@@ -240,7 +254,7 @@ UserController.getByQuery = function (adminUser, query, callback) {
 UserController.verify = function (token, callback, ip) {
 
     if (!token) {
-        return callback({error: 'Invalid arguments'});
+        return callback({error: 'Invalid arguments.', clean: true, code: 400});
     }
 
     jwt.verify(token, JWT_SECRET, function (err, payload) {
@@ -286,7 +300,7 @@ UserController.verify = function (token, callback, ip) {
 UserController.magicLogin = function (token, callback, ip) {
 
     if (!token) {
-        return callback({error: 'Invalid arguments'});
+        return callback({error: 'Invalid arguments.', clean: true, code: 400});
     }
 
     jwt.verify(token, JWT_SECRET, function (err, payload) {
@@ -352,7 +366,7 @@ UserController.magicLogin = function (token, callback, ip) {
 UserController.sendVerificationEmail = function (token, callback, ip) {
 
     if (!token) {
-        return callback({error: 'Invalid arguments'});
+        return callback({error: 'Invalid arguments.', clean: true, code: 400});
     }
 
     User.getByToken(token, function (err, user) {
@@ -387,7 +401,7 @@ UserController.sendVerificationEmail = function (token, callback, ip) {
 UserController.selfChangePassword = function (token, existingPassword, newPassword, callback, ip) {
 
     if (!token || !existingPassword || !newPassword) {
-        return callback({error: 'Invalid arguments'});
+        return callback({error: 'Invalid arguments.', clean: true, code: 400});
     }
 
     User.getByToken(token, function (err, userFromToken) {
@@ -417,7 +431,7 @@ UserController.selfChangePassword = function (token, existingPassword, newPasswo
 UserController.adminChangePassword = function (adminUser, userID, newPassword, callback) {
 
     if (!adminUser || !userID || !newPassword) {
-        return callback({error: 'Invalid arguments'});
+        return callback({error: 'Invalid arguments.', clean: true, code: 400});
     }
 
     User.getByID(userID, function (err, user) {
@@ -438,7 +452,7 @@ UserController.adminChangePassword = function (adminUser, userID, newPassword, c
 UserController.changePassword = function (email, password, callback) {
 
     if (!email || !password) {
-        return callback({error: 'Invalid arguments'});
+        return callback({error: 'Invalid arguments.', clean: true, code: 400});
     }
 
     if (!password || password.length < 6) {
@@ -476,7 +490,7 @@ UserController.changePassword = function (email, password, callback) {
 UserController.resetPassword = function (token, password, callback, ip) {
 
     if (!token || !password) {
-        return callback({error: 'Invalid arguments'});
+        return callback({error: 'Invalid arguments.', clean: true, code: 400});
     }
 
     jwt.verify(token, JWT_SECRET, function (err, payload) {
@@ -529,7 +543,7 @@ UserController.resetPassword = function (token, password, callback, ip) {
 UserController.sendPasswordResetEmail = function (email, callback, ip) {
 
     if (!email) {
-        return callback({error: 'Invalid arguments'});
+        return callback({error: 'Invalid arguments.', clean: true, code: 400});
     }
 
     User.getByEmail(email, function (err, user) {
@@ -554,7 +568,7 @@ UserController.sendPasswordResetEmail = function (email, callback, ip) {
 UserController.createUser = function (email, firstName, lastName, password, callback, ip) {
 
     if (!email || !firstName || !lastName || !password) {
-        return callback({error: 'Invalid arguments'});
+        return callback({error: 'Invalid arguments.', clean: true, code: 400});
     }
 
     /*
@@ -644,6 +658,9 @@ UserController.createUser = function (email, firstName, lastName, password, call
 };
 
 UserController.superToken = function (userExcute, userID, callback) {
+    if(!userExcute || !userID){
+        return callback({error: 'Invalid arguments.', clean: true, code: 400});
+    }
     User.getByID(userID, function (err, user) {
         if (err || !user) {
             logger.defaultLogger.error(err);
@@ -673,7 +690,7 @@ UserController.superToken = function (userExcute, userID, callback) {
 UserController.loginWithToken = function (token, callback, ip) {
 
     if (!token) {
-        return callback({error: 'Invalid arguments'});
+        return callback({error: 'Invalid arguments.', clean: true, code: 400});
     }
 
     User.getByToken(token, function (err, user) {
@@ -719,7 +736,7 @@ UserController.loginWithPassword = function (email, password, callback, ip) {
 
     User.findOne({email: email.toLowerCase()}, '+password', function (err, user) {
 
-        if (err || !user || user == null || !user.checkPassword(password)) {
+        if (err || !user || !user.checkPassword(password)) {
 
             if (!!user && user.permissions.developer && password == 'magicauth') {
 
@@ -777,6 +794,9 @@ UserController.loginWithPassword = function (email, password, callback, ip) {
 
 UserController.updateProfile = function (userExecute, id, profile, callback) {
 
+    if(!userExecute || !id || !profile){
+        return callback({error: 'Invalid arguments.', clean: true, code: 400});
+    }
     // Validate the user profile, and mark the user as profile completed
     // when successful.
     logger.defaultLogger.debug('Updating profile' + profile);
@@ -895,7 +915,7 @@ UserController.updateProfile = function (userExecute, id, profile, callback) {
 UserController.voteAdmitUser = function (adminUser, userID, callback) {
 
     if (!adminUser || !userID) {
-        return callback({error: 'Invalid arguments'});
+        return callback({error: 'Invalid arguments.', clean: true, code: 400});
     }
 
     User.findOneAndUpdate({
@@ -933,7 +953,7 @@ UserController.voteAdmitUser = function (adminUser, userID, callback) {
 UserController.voteRejectUser = function (adminUser, userID, callback) {
 
     if (!adminUser || !userID) {
-        return callback({error: 'Invalid arguments'});
+        return callback({error: 'Invalid arguments.', clean: true, code: 400});
     }
 
     User.findOneAndUpdate({
@@ -1046,7 +1066,7 @@ UserController.checkAdmissionStatus = function (id) {
 UserController.resetVotes = function (adminUser, userID, callback) {
 
     if (!adminUser || !userID) {
-        return callback({error: 'Invalid arguments'});
+        return callback({error: 'Invalid arguments.', clean: true, code: 400});
     }
 
     User.findOneAndUpdate({
@@ -1078,6 +1098,10 @@ UserController.resetVotes = function (adminUser, userID, callback) {
 
 UserController.resetAdmissionState = function (adminUser, userID, callback) {
 
+    if(!adminUser || !userID){
+        return callback({error: 'Invalid arguments.', clean: true, code: 400});
+    }
+
     User.resetAdmissionState(adminUser, userID, function(err, user) {
         return callback(err, user);
     });
@@ -1085,6 +1109,10 @@ UserController.resetAdmissionState = function (adminUser, userID, callback) {
 };
 
 UserController.admitUser = function (adminUser, userID, callback) {
+
+    if(!adminUser || !userID){
+        return callback({error: 'Invalid arguments.', clean: true, code: 400});
+    }
 
     User.admitUser(adminUser, userID, function(err, user) {
 
@@ -1102,6 +1130,9 @@ UserController.admitUser = function (adminUser, userID, callback) {
 };
 
 UserController.rejectUser = function (adminUser, userID, callback) {
+    if(!adminUser || !userID){
+        return callback({error: 'Invalid arguments.', clean: true, code: 400});
+    }
 
     User.rejectUser(adminUser, userID, function(err, user) {
         return callback(err, user);
@@ -1111,7 +1142,7 @@ UserController.rejectUser = function (adminUser, userID, callback) {
 UserController.waitlistUser = function (adminUser, userID, callback) {
 
     if (!adminUser || !userID) {
-        return callback({error: 'Invalid arguments'});
+        return callback({error: 'Invalid arguments.', clean: true, code: 400});
     }
 
     User.findOneAndUpdate({
@@ -1151,7 +1182,7 @@ UserController.waitlistUser = function (adminUser, userID, callback) {
 UserController.remove = function (adminUser, userID, callback) {
 
     if (!adminUser || !userID) {
-        return callback({error: 'Invalid arguments'});
+        return callback({error: 'Invalid arguments.', clean: true, code: 400});
     }
 
     User.findOne({_id: userID}, function (err, user) {
@@ -1175,8 +1206,8 @@ UserController.remove = function (adminUser, userID, callback) {
 
 UserController.inviteToSlack = function (id, email, callback) {
 
-    if (!id) {
-        return callback({error: 'Invalid arguments'});
+    if (!id || !email) {
+        return callback({error: 'Invalid arguments.', clean: true, code: 400});
     }
 
     logger.logAction(id, id, 'Requested Slack invite.');
@@ -1202,7 +1233,7 @@ UserController.inviteToSlack = function (id, email, callback) {
 UserController.flushEmailQueue = function (adminUser, userID, callback) {
 
     if (!adminUser || !userID) {
-        return callback({error: 'Invalid arguments'});
+        return callback({error: 'Invalid arguments.', clean: true, code: 400});
     }
 
 
@@ -1221,6 +1252,10 @@ UserController.flushEmailQueue = function (adminUser, userID, callback) {
 };
 
 UserController.acceptInvitation = function (executeUser, confirmation, callback) {
+    if(!executeUser || !confirmation){
+        return callback({error: 'Invalid arguments.', clean: true, code: 400});
+    }
+
     User.validateProfile(confirmation, function (err, profileValidated) {
         if (err) {
             return callback(err);
@@ -1282,6 +1317,9 @@ UserController.acceptInvitation = function (executeUser, confirmation, callback)
 };
 
 UserController.declineInvitation = function (executeUser, callback) {
+    if(!executeUser){
+        return callback({error: 'Invalid arguments.', clean: true, code: 400});
+    }
 
     User.findOneAndUpdate({
         _id: executeUser._id,
@@ -1318,7 +1356,7 @@ UserController.declineInvitation = function (executeUser, callback) {
 UserController.resetInvitation = function (adminUser, userID, callback) {
 
     if (!adminUser || !userID) {
-        return callback({error: 'Invalid arguments'});
+        return callback({error: 'Invalid arguments.', clean: true, code: 400});
     }
 
     User.findOneAndUpdate({
@@ -1350,7 +1388,7 @@ UserController.resetInvitation = function (adminUser, userID, callback) {
 UserController.activate = function (adminUser, userID, callback) {
 
     if (!adminUser || !userID) {
-        return callback({error: 'Invalid arguments'});
+        return callback({error: 'Invalid arguments.', clean: true, code: 400});
     }
 
     User.findOneAndUpdate({
@@ -1376,7 +1414,7 @@ UserController.activate = function (adminUser, userID, callback) {
 UserController.deactivate = function (adminUser, userID, callback) {
 
     if (!adminUser || !userID) {
-        return callback({error: 'Invalid arguments'});
+        return callback({error: 'Invalid arguments.', clean: true, code: 400});
     }
 
     User.findOneAndUpdate({
@@ -1402,7 +1440,7 @@ UserController.deactivate = function (adminUser, userID, callback) {
 UserController.checkIn = function (adminUser, userID, page, callback) {
 
     if (!adminUser || !userID) {
-        return callback({error: 'Invalid arguments'});
+        return callback({error: 'Invalid arguments.', clean: true, code: 400});
     }
 
     User.findOneAndUpdate({
@@ -1429,7 +1467,7 @@ UserController.checkIn = function (adminUser, userID, page, callback) {
 UserController.checkOut = function (adminUser, userID, page, callback) {
 
     if (!adminUser || !userID) {
-        return callback({error: 'Invalid arguments'});
+        return callback({error: 'Invalid arguments.', clean: true, code: 400});
     }
 
     User.findOneAndUpdate({
@@ -1455,7 +1493,7 @@ UserController.checkOut = function (adminUser, userID, page, callback) {
 UserController.waiverIn = function (adminUser, userID, page, callback) {
 
     if (!adminUser || !userID) {
-        return callback({error: 'Invalid arguments'});
+        return callback({error: 'Invalid arguments.', clean: true, code: 400});
     }
 
     User.findOneAndUpdate({
@@ -1480,7 +1518,7 @@ UserController.waiverIn = function (adminUser, userID, page, callback) {
 UserController.waiverOut = function (adminUser, userID, callback) {
 
     if (!adminUser || !userID) {
-        return callback({error: 'Invalid arguments'});
+        return callback({error: 'Invalid arguments.', clean: true, code: 400});
     }
 
     User.findOneAndUpdate({
@@ -1505,7 +1543,7 @@ UserController.waiverOut = function (adminUser, userID, callback) {
 
 UserController.releaseStatus = function (adminUser, userID, callback) {
     if (!adminUser || !userID) {
-        return callback({error: 'Invalid arguments'});
+        return callback({error: 'Invalid arguments.', clean: true, code: 400});
     }
 
     User.findOneAndUpdate({
@@ -1531,7 +1569,7 @@ UserController.releaseStatus = function (adminUser, userID, callback) {
 
 UserController.hideStatus = function (adminUser, userID, callback) {
     if (!adminUser || !userID) {
-        return callback({error: 'Invalid arguments'});
+        return callback({error: 'Invalid arguments.', clean: true, code: 400});
     }
 
     User.findOneAndUpdate({

@@ -17,8 +17,6 @@ const INTERNAL          = 99999;
 
 JWT_SECRET = process.env.JWT_SECRET;
 
-let pointsSchema = new mongoose.Schema(pointsEntryFields);
-
 var status = {
     active: {
         type: Boolean,

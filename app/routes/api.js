@@ -13,6 +13,7 @@ const LogEvent           = require('../models/LogEvent');
 const UserController     = require('../controllers/UserController');
 const TeamController     = require('../controllers/TeamController');
 const SettingsController = require('../controllers/SettingsController');
+const EventController    = require('../controllers/EventController');
 const globalUsersManager  = require('../services/globalUsersManager');
 
 const permissions        = require('../services/permissions');
@@ -27,6 +28,12 @@ JWT_SECRET             = process.env.JWT_SECRET;
 
 module.exports = function(router) {
     router.use(express.json());
+
+    // Admin
+    // Create event
+    router.post('/createEvent', permissions.isAdmin, function(req, res){
+        EventController.createEvent(req.userExecute, req.body.name, req.body.description, req.body.dateTime, logger.defaultResponse(req, res));
+    })
 
     // Admin
     // Award points to a team
