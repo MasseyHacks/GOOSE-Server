@@ -24,7 +24,25 @@ let dates = {
     event: {
         type: Number,
         required: true,
+        default: 0
+    }
+}
+
+let options = {
+    maxRegistrations: {
+        type: Number,
+        required: true,
         default: -1
+    },
+    mustRegisterBeforeCheckIn: {
+        type: Boolean,
+        required: true,
+        default: true
+    },
+    public: {
+        type: Boolean,
+        required: true,
+        default: true
     }
 }
 
@@ -37,27 +55,15 @@ let schema = {
         type: String,
         required: true
     },
-    maxRegistrations: {
-        type: Number,
-        required: true,
-        default: -1
-    },
-    mustRegisterBeforeCheckIn: {
-        type: Boolean,
-        required: true,
-        default: true
-    },
     registeredUsers: {
-        type: [mongoose.Schema.Types.ObjectId]
+        type: [mongoose.Schema.Types.ObjectId],
+        select: false
     },
     checkInData: {
-        type: [checkInEntryFields]
+        type: [checkInEntryFields],
+        select: false
     },
-    public: {
-        type: Boolean,
-        required: true,
-        default: true
-    },
+    options: options,
     dates: dates
 
 }

@@ -29,12 +29,8 @@ function escapeRegExp(str) {
 }
 
 UserController.addPoints = function (adminUser, id, amount, notes, callback) {
-    if(!adminUser || !id){
+    if(!adminUser || !id || amount === null || isNaN(amount) || (amount * 10)%10 !== 0 || !notes){
         return callback({error: 'Invalid arguments.', clean: true, code: 400});
-    }
-
-    if(isNaN(amount) || (amount * 10)%10 !== 0){
-        return callback({error: "Points award amount is not a whole number!", clean: true, code: 400})
     }
     User.addPoints(adminUser, id, amount, notes, function(err, msg) {
         if(err){

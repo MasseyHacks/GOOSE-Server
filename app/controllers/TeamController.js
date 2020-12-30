@@ -574,8 +574,8 @@ TeamController.deactivateTeam = function(adminUser, code, callback, log=true){
 }
 
 TeamController.addPoints = function(adminUser, code, amount, notes, callback) {
-    if(isNaN(amount) || (amount * 10)%10 !== 0){
-        return callback({error: "Points award amount is not a whole number!", clean: true, code: 400})
+    if(!adminUser || !code || amount === null || isNaN(amount) || (amount * 10)%10 !== 0 || !notes){
+        return callback({error: "Invalid arguments.", clean: true, code: 400})
     }
     Team.findOne({code: code}).select("memberIDs").exec(function(err, team){
         if(err){

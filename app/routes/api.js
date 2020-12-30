@@ -36,6 +36,12 @@ module.exports = function(router) {
     })
 
     // Admin
+    // Update event dates
+    router.post('/updateEventDates', permissions.isAdmin, function(req, res){
+        EventController.updateDates(req.userExecute, req.body.id, req.body.newDates, logger.defaultResponse(req, res));
+    })
+
+    // Admin
     // Award points to a team
     router.post('/awardTeamPoints', permissions.isAdmin, function(req, res){
         TeamController.addPoints(req.userExecute, req.body.code, req.body.amount, req.body.notes, logger.defaultResponse(req, res));
