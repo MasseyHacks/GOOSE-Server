@@ -1,4 +1,3 @@
-const mongoose = require('mongoose')
 let fields = {
     checkInTime: {
         type: Number,

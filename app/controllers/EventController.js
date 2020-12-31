@@ -1,4 +1,5 @@
 const Event = require('../models/Event');
+const User = require('../models/User');
 const logger = require('../services/logger');
 
 let EventController = {};
@@ -154,21 +155,31 @@ EventController.checkInUser = function(userExecute, userID, eventID, callback){
         return callback({error: "You cannot check in that user.", clean: true, code: 403})
     }
 
-    Event.findOne({_id: eventID}).select('+registeredUsers').exec(function(err, event){
+    Event.findOne({
+        _id: eventID,
+        checkInData: {
+            $not: {
+                $elemMatch: {
+                    checkedInUser: userID
+                }
+            }
+
+        }
+    }).select('+registeredUsers +checkInData').exec(function(err, event){
         if(err){
             logger.defaultLogger.error(`Error querying event while attempting to check in user to event. `, err);
             return callback(err);
         }
 
         if(!event){
-            return callback({error: "The given event does not exist.", clean: true, code: 400});
+            return callback({error: "The given event does not exist or you have already checked in to it.", clean: true, code: 400});
         }
 
         logger.defaultLogger.silly(event)
 
         if(event.registeredUsers.indexOf(userID) === -1) {
             if(!event.options.public){
-                return callback({error: "The given event does not exist.", clean: true, code: 400});
+                return callback({error: "The given event does not exist or you have already checked in to it.", clean: true, code: 400});
             }
             if(event.options.mustRegisterBeforeCheckIn){
                 return callback({error: "You must register for this event before checking in.", clean: true, code: 400});
@@ -184,8 +195,7 @@ EventController.checkInUser = function(userExecute, userID, eventID, callback){
             return callback({error: "Check in for this event has ended.", clean: true, code: 400});
         }
 
-
-
+        // update checked in as well as registration, if user did not register yet
         let queryObj = {
             $push: {
                 checkInData: {checkInTime: Date.now(), checkedInUser: userID}
@@ -198,12 +208,37 @@ EventController.checkInUser = function(userExecute, userID, eventID, callback){
 
         Event.updateOne({_id: eventID}, queryObj, function(err, msg){
             if(err){
-                logger.defaultLogger.error(`There was an error updating the event while attempting to check in user. `, err);
+                logger.defaultLogger.error(`There was an error updating the event ${eventID} while attempting to check in user ${userID}. `, err);
                 return callback(err);
             }
-            return callback(null, {message: "Checked in to event successfully."})
+
+            // update checked in as well as registration, if user did not register yet
+            let queryObj = {
+                $push: {
+                    'events.checkedIn': eventID
+                }
+            }
+
+            if(event.registeredUsers.indexOf(userID) === -1){
+                queryObj["$push"]["events"]["registered"] = userID
+            }
+
+            // update the user as well
+            User.updateOne({_id: userID}, queryObj, function(err, user){
+                if(err){
+                    logger.defaultLogger.error(`There was an error updating the user while attempting to check in user ${userID} to event ${eventID}. `, err);
+                    return callback(err);
+                }
+
+                return callback(null, {message: "Checked in to event successfully."});
+            })
+
         })
     });
+}
+
+EventController.registerUser = function(userExecute, userID, eventID, callback) {
+
 }
 
 EventController.getAllEvents = function(callback) {
@@ -214,10 +249,6 @@ EventController.getAllEvents = function(callback) {
         }
         return callback(null, events);
     });
-}
-
-EventController.registerUser = function(userExecute, userID, eventID, callback) {
-
 }
 
 module.exports = EventController;

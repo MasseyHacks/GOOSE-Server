@@ -426,6 +426,15 @@ var permissions = {
     }
 };
 
+let events = {
+    registered: {
+        type: [String]
+    },
+    checkedIn: {
+        type: [String]
+    }
+}
+
 var schema = {
 
     firstName: {
@@ -561,7 +570,8 @@ var schema = {
         history : {
             type: [pointsEntryFields]
         }
-    }
+    },
+    events: events
 };
 
 module.exports = schema;
