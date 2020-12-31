@@ -71,6 +71,12 @@ module.exports = function(router) {
         EventController.checkInUser(req.userExecute, req.body.userID, req.body.eventID, logger.defaultResponse(req, res));
     })
 
+    // General
+    // Get event dashboard messages
+    router.get('/getEventMessages', permissions.isVerified, function(req, res){
+        EventController.getMessages(req.userExecute, req.body.eventID, logger.defaultResponse(req, res));
+    })
+
     // Admin
     // Award points to a team
     router.post('/awardTeamPoints', permissions.isAdmin, function(req, res){

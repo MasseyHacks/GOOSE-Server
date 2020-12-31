@@ -366,6 +366,52 @@ EventController.unregisterUser = function(userExecute, userID, eventID, callback
     });
 }
 
+EventController.getMessages = function(userExecute, eventID, callback){
+    Event.findOne({
+        _id: eventID
+    }).select('messages.registered messages.checkedIn checkInData registeredUsers').exec(function(err, event){
+        if(err){
+            logger.defaultLogger.error(`Error querying event messages for ${eventID}. `, err);
+            return callback(err);
+        }
+
+        if(!event){
+            return callback({error: "The given event does not exist or you do not have permission to view its messages."});
+        }
+
+        // admin gets all messages
+        if(userExecute.permissions.admin){
+            return callback(null, event.messages);
+        }
+
+        let rMessages = {}
+
+        // check if user is registered
+        if(event.registeredUsers.indexOf(userExecute._id) !== -1){
+            rMessages["registered"] = event.messages.registered ? event.messages.registered : "You are registered!";
+        }
+
+        // check if user is checked in
+        let found = false;
+        for(const entry of event.checkInData){
+            logger.defaultLogger.silly(entry);
+            if(entry.checkedInUser === userExecute._id.toString()){
+                found = true;
+            }
+        }
+
+        if(found){
+            rMessages["checkedIn"] = event.messages.checkedIn ? event.messages.checkedInd : "You are checked in!";
+        }
+
+        if(Object.keys(rMessages).length === 0){
+            return callback({error: "The given event does not exist or you do not have permission to view its messages."});
+        }
+
+        return callback(null, rMessages);
+    })
+}
+
 EventController.getRegistered = function(id, callback){
 
 }
