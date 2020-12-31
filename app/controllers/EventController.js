@@ -46,7 +46,7 @@ EventController.updateDates = function(adminUser, id, newDates, callback) {
                 logger.defaultLogger.error('Error updating event dates while attempting to update event dates. ', err);
                 return callback(err);
             }
-            logger.logAction(adminUser._id, -1, "Modified event dates.",`Event ID: ${eventID}`)
+            logger.logAction(adminUser._id, -1, "Modified event dates.",`Event ID: ${id}`)
             return callback(null, event);
         })
 
@@ -77,14 +77,14 @@ EventController.updateOptions = function(adminUser, id, newOptions, callback){
                 logger.defaultLogger.error('Error updating event options while attempting to update event options. ', err);
                 return callback(err);
             }
-            logger.logAction(adminUser._id, -1, "Modified event options.",`Event ID: ${eventID}`)
+            logger.logAction(adminUser._id, -1, "Modified event options.",`Event ID: ${id}`)
             return callback(null, event);
         })
     })
 }
 
-EventController.updateDetails = function(adminUser, eventID, newName, newDescription, callback){
-    if(!adminUser || !eventID || !newName || !newDescription){
+EventController.updateDetails = function(adminUser, id, newName, newDescription, callback){
+    if(!adminUser || !id || !newName || !newDescription){
         return callback({error: 'Invalid arguments.', clean: true, code: 400});
     }
 
@@ -93,7 +93,7 @@ EventController.updateDetails = function(adminUser, eventID, newName, newDescrip
     }
 
     Event.findOneAndUpdate({
-        _id: eventID
+        _id: id
     }, {
         $set: {
             name: newName,
@@ -106,8 +106,38 @@ EventController.updateDetails = function(adminUser, eventID, newName, newDescrip
             logger.defaultLogger.error('Error updating event details while attempting to update event details. ', err);
             return callback(err);
         }
-        logger.logAction(adminUser._id, -1, "Modified event details.",`Event ID: ${eventID}`)
+        logger.logAction(adminUser._id, -1, "Modified event details.",`Event ID: ${id}`)
         return callback(null, event);
+    })
+}
+
+EventController.updateMessages = function(adminUser, id, newMessages, callback){
+    if(!adminUser || !id || !newMessages){
+        return callback({error: 'Invalid arguments.', clean: true, code: 400});
+    }
+
+    Event.validateMessages(newMessages, function(err, filteredMessages){
+        if(err){
+            logger.defaultLogger.error(`Error validating new messages while attempting to update event messages. `, err);
+            return callback(err);
+        }
+
+        Event.findOneAndUpdate({
+            _id: id
+        }, {
+            $set: {
+                messages: filteredMessages
+            }
+        }, {
+            new: true
+        }, function(err, event){
+            if(err){
+                logger.defaultLogger.error('Error updating event messages while attempting to update event messages. ', err);
+                return callback(err);
+            }
+            logger.logAction(adminUser._id, -1, "Modified event messages.",`Event ID: ${id}`)
+            return callback(null, event);
+        })
     })
 }
 
@@ -399,15 +429,15 @@ EventController.unregisterUser = function(userExecute, userID, eventID, callback
     });
 }
 
-EventController.getMessages = function(userExecute, eventID, callback){
-    if(!userExecute || !eventID){
+EventController.getMessages = function(userExecute, id, callback){
+    if(!userExecute || !id){
         return callback({error: 'Invalid arguments.', clean: true, code: 400})
     }
     Event.findOne({
-        _id: eventID
+        _id: id
     }).select('messages.registered messages.checkedIn checkInData registeredUsers').exec(function(err, event){
         if(err){
-            logger.defaultLogger.error(`Error querying event messages for ${eventID}. `, err);
+            logger.defaultLogger.error(`Error querying event messages for ${id}. `, err);
             return callback(err);
         }
 
@@ -474,8 +504,8 @@ EventController.getAllEvents = function(callback) {
     });
 }
 
-EventController.getByID = function(userExecute, eventID, callback){
-    if(!userExecute || !eventID){
+EventController.getByID = function(userExecute, id, callback){
+    if(!userExecute || !id){
         return callback({error: 'Invalid arguments.', clean: true, code: 400})
     }
     let selectProjection = '';
@@ -484,10 +514,10 @@ EventController.getByID = function(userExecute, eventID, callback){
     }
 
     Event.findOne({
-        _id: eventID
+        _id: id
     }).select(selectProjection).exec(function(err, event){
         if(err){
-            logger.defaultLogger.error(`Error retrieving event ${eventID}. `, err);
+            logger.defaultLogger.error(`Error retrieving event ${id}. `, err);
             return callback(err);
         }
 

@@ -54,6 +54,12 @@ module.exports = function(router) {
     })
 
     // Admin
+    // Update event messages
+    router.post('/updateEventMessages', permissions.isAdmin, function(req, res){
+        EventController.updateMessages(req.userExecute, req.body.id, req.body.newMessages, logger.defaultResponse(req, res));
+    })
+
+    // Admin
     // Get all events
     router.get('/getAllEvents', permissions.isAdmin, function(req, res){
         EventController.getAllEvents(logger.defaultResponse(req, res));
