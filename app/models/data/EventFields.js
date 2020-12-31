@@ -56,7 +56,7 @@ let schema = {
         required: true
     },
     registeredUsers: {
-        type: [mongoose.Schema.Types.ObjectId],
+        type: [String],
         select: false
     },
     checkInData: {
@@ -64,7 +64,11 @@ let schema = {
         select: false
     },
     options: options,
-    dates: dates
+    dates: dates,
+    info: {
+        type: String,
+        select: false
+    }
 
 }
 

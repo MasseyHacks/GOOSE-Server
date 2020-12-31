@@ -4,8 +4,8 @@ let fields = {
         type: Number,
         required: true
     },
-    checkInUser: {
-        type: mongoose.Schema.Types.ObjectId,
+    checkedInUser: {
+        type: String,
         required: true
     }
 }

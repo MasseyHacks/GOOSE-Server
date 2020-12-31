@@ -18,6 +18,18 @@ schema.statics.validateDates = function(newDates, callback) {
         }
         toPush[key] = newDates[key];
     }
+
+    if(toPush.registrationClose !== -1 && toPush.registrationClose < toPush.registrationOpen){
+        return callback({error: "Registration close is before open.", clean: true, code: 400});
+    }
+
+    if(toPush.checkInClose !== -1 && toPush.checkInClose < toPush.checkInOpen){
+        return callback({error: "Check in close is before open.", clean: true, code: 400});
+    }
+
+    if(toPush.checkInOpen < toPush.registrationOpen){
+        return callback({error: "Check in opens before registration.", clean: true, code: 400});
+    }
     return callback(null, toPush);
 }
 

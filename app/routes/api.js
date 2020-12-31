@@ -47,6 +47,16 @@ module.exports = function(router) {
         EventController.updateOptions(req.userExecute, req.body.id, req.body.newOptions, logger.defaultResponse(req, res));
     })
 
+    // General
+    router.get('/getFilteredEvents', permissions.isVerified, function(req, res){
+        EventController.getFilteredEvents(req.userExecute, logger.defaultResponse(req, res));
+    })
+
+    // General
+    router.post('/checkInToEvent', permissions.isVerified, function(req, res){
+        EventController.checkInUser(req.userExecute, req.body.userID, req.body.eventID, logger.defaultResponse(req, res));
+    })
+
     // Admin
     // Award points to a team
     router.post('/awardTeamPoints', permissions.isAdmin, function(req, res){
