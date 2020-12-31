@@ -81,14 +81,6 @@ EventController.updateOptions = function(adminUser, id, newOptions, callback){
     })
 }
 
-EventController.getRegistered = function(id, callback){
-
-}
-
-EventController.getCheckedIn = function(id, callback){
-
-}
-
 EventController.getFilteredEvents = function(userExecute, callback) {
     if(!userExecute){
         return callback({error: 'Invalid arguments.', clean: true, code: 400})
@@ -238,6 +230,147 @@ EventController.checkInUser = function(userExecute, userID, eventID, callback){
 }
 
 EventController.registerUser = function(userExecute, userID, eventID, callback) {
+    // if normal user:
+    // - do not allow check in to a non-public event that user is not registered for
+    // - do not allow check in to an event that requires registration before check in
+    // - do not allow check in to an event with check in closed
+    if(!userExecute || !userID || !eventID){
+        return callback({error: 'Invalid arguments.', clean: true, code: 400})
+    }
+
+    if(userExecute._id.toString() !== userID && !userExecute.permissions.admin){
+        return callback({error: "You cannot register that user.", clean: true, code: 403})
+    }
+
+    Event.findOne({
+        _id: eventID,
+        registeredUsers: {
+            $not: {
+                $elemMatch: {
+                    $eq: userID
+                }
+            }
+
+        }
+    }).exec(function(err, event){
+        if(err){
+            logger.defaultLogger.error(`Error querying event while attempting to register user for event. `, err);
+            return callback(err);
+        }
+
+        if(!event){
+            return callback({error: "The given event does not exist or you have already registered for it.", clean: true, code: 400});
+        }
+
+        logger.defaultLogger.silly(event)
+
+        // note: don't need to check if event is public as it requires an event ID as argument
+
+        // check if registration has started
+        if(event.dates.registrationOpen > Date.now()){
+            return callback({error: "Check in for this event has not yet started.", clean: true, code: 400});
+        }
+
+        if(event.dates.registrationClose !== -1 && event.dates.registrationClose < Date.now()){
+            return callback({error: "Check in for this event has ended.", clean: true, code: 400});
+        }
+
+        Event.updateOne({_id: eventID}, {
+            $push: {
+                registeredUsers: userID
+            }
+        }, function(err, msg){
+            if(err){
+                logger.defaultLogger.error(`There was an error updating the event ${eventID} while attempting to register user ${userID}. `, err);
+                return callback(err);
+            }
+
+            // update the user as well
+            User.updateOne({_id: userID}, {
+                $push: {
+                    'events.registered': eventID
+                }
+            }, function(err, user){
+                if(err){
+                    logger.defaultLogger.error(`There was an error updating the user while attempting to register user ${userID} for event ${eventID}. `, err);
+                    return callback(err);
+                }
+
+                return callback(null, {message: "Registered for event successfully."});
+            })
+
+        })
+    });
+}
+
+EventController.unregisterUser = function(userExecute, userID, eventID, callback){
+    if(!userExecute || !userID || !eventID){
+        return callback({error: 'Invalid arguments.', clean: true, code: 400})
+    }
+
+    if(userExecute._id.toString() !== userID && !userExecute.permissions.admin){
+        return callback({error: "You cannot unregister that user.", clean: true, code: 403})
+    }
+
+    Event.findOne({
+        _id: eventID,
+        registeredUsers: {
+            $elemMatch: {
+                $eq: userID
+            }
+        },
+        checkInData: {
+            $not: {
+                $elemMatch: {
+                    checkedInUser: userID
+                }
+            }
+        }
+    }).select('+checkInData').exec(function(err, event){
+        if(err){
+            logger.defaultLogger.error(`Error querying event while attempting to unregister user from event. `, err);
+            return callback(err);
+        }
+
+        if(!event){
+            return callback({error: "The given event does not exist or you have not registered for it or you have already checked in to it.", clean: true, code: 400});
+        }
+
+        logger.defaultLogger.silly(event)
+
+        Event.updateOne({_id: eventID}, {
+            $pull: {
+                registeredUsers: userID
+            }
+        }, function(err, msg){
+            if(err){
+                logger.defaultLogger.error(`There was an error updating the event ${eventID} while attempting to unregister user ${userID}. `, err);
+                return callback(err);
+            }
+
+            // update the user as well
+            User.updateOne({_id: userID}, {
+                $pull: {
+                    'events.registered': eventID
+                }
+            }, function(err, user){
+                if(err){
+                    logger.defaultLogger.error(`There was an error updating the user while attempting to unregister user ${userID} from event ${eventID}. `, err);
+                    return callback(err);
+                }
+
+                return callback(null, {message: "Unregistered from event successfully."});
+            })
+
+        })
+    });
+}
+
+EventController.getRegistered = function(id, callback){
+
+}
+
+EventController.getCheckedIn = function(id, callback){
 
 }
 

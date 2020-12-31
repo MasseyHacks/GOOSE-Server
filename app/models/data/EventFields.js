@@ -46,6 +46,17 @@ let options = {
     }
 }
 
+let messages = {
+    registered: {
+        type: String,
+        select: false
+    },
+    checkedIn: {
+        type: String,
+        select: false
+    }
+}
+
 let schema = {
     name: {
         type: String,
@@ -65,11 +76,7 @@ let schema = {
     },
     options: options,
     dates: dates,
-    info: {
-        type: String,
-        select: false
-    }
-
+    messages: messages
 }
 
 module.exports = schema;

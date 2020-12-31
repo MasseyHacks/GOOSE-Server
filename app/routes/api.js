@@ -48,11 +48,25 @@ module.exports = function(router) {
     })
 
     // General
+    // Get a filtered list of events
     router.get('/getFilteredEvents', permissions.isVerified, function(req, res){
         EventController.getFilteredEvents(req.userExecute, logger.defaultResponse(req, res));
     })
 
     // General
+    // Register for an event
+    router.post('/registerForEvent', permissions.isVerified, function(req, res){
+        EventController.registerUser(req.userExecute, req.body.userID, req.body.eventID, logger.defaultResponse(req, res));
+    })
+
+    // General
+    // Unregister for an event
+    router.post('/unregisterFromEvent', permissions.isVerified, function(req, res){
+        EventController.unregisterUser(req.userExecute, req.body.userID, req.body.eventID, logger.defaultResponse(req, res));
+    })
+
+    // General
+    // Check in to an event
     router.post('/checkInToEvent', permissions.isVerified, function(req, res){
         EventController.checkInUser(req.userExecute, req.body.userID, req.body.eventID, logger.defaultResponse(req, res));
     })
