@@ -49,11 +49,15 @@ let options = {
 let messages = {
     registered: {
         type: String,
-        select: false
+        select: false,
+        required: true,
+        default: "You are registered!"
     },
     checkedIn: {
         type: String,
-        select: false
+        select: false,
+        required: true,
+        default: "You are checked in!"
     }
 }
 

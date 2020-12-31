@@ -48,9 +48,21 @@ module.exports = function(router) {
     })
 
     // Admin
+    // Update event details
+    router.post('/updateEventDetails', permissions.isAdmin, function(req, res){
+        EventController.updateDetails(req.userExecute, req.body.id, req.body.newName, req.body.newDescription, logger.defaultResponse(req, res));
+    })
+
+    // Admin
     // Get all events
     router.get('/getAllEvents', permissions.isAdmin, function(req, res){
         EventController.getAllEvents(logger.defaultResponse(req, res));
+    })
+
+    // General
+    // Get event by ID
+    router.get('/getEvent', permissions.isVerified, function(req, res){
+        EventController.getByID(req.userExecute, req.query.id, logger.defaultResponse(req, res));
     })
 
     // General

@@ -83,6 +83,34 @@ EventController.updateOptions = function(adminUser, id, newOptions, callback){
     })
 }
 
+EventController.updateDetails = function(adminUser, eventID, newName, newDescription, callback){
+    if(!adminUser || !eventID || !newName || !newDescription){
+        return callback({error: 'Invalid arguments.', clean: true, code: 400});
+    }
+
+    if(newName.trim() === "" || newDescription.trim() === ""){
+        return callback({error: 'Event name and description cannot be blank.', clean: true, code: 400})
+    }
+
+    Event.findOneAndUpdate({
+        _id: eventID
+    }, {
+        $set: {
+            name: newName,
+            description: newDescription
+        }
+    }, {
+        new: true
+    }, function(err, event){
+        if(err){
+            logger.defaultLogger.error('Error updating event details while attempting to update event details. ', err);
+            return callback(err);
+        }
+        logger.logAction(adminUser._id, -1, "Modified event details.",`Event ID: ${eventID}`)
+        return callback(null, event);
+    })
+}
+
 EventController.getFilteredEvents = function(userExecute, callback) {
     if(!userExecute){
         return callback({error: 'Invalid arguments.', clean: true, code: 400})
@@ -372,6 +400,9 @@ EventController.unregisterUser = function(userExecute, userID, eventID, callback
 }
 
 EventController.getMessages = function(userExecute, eventID, callback){
+    if(!userExecute || !eventID){
+        return callback({error: 'Invalid arguments.', clean: true, code: 400})
+    }
     Event.findOne({
         _id: eventID
     }).select('messages.registered messages.checkedIn checkInData registeredUsers').exec(function(err, event){
@@ -393,7 +424,7 @@ EventController.getMessages = function(userExecute, eventID, callback){
 
         // check if user is registered
         if(event.registeredUsers.indexOf(userExecute._id) !== -1){
-            rMessages["registered"] = event.messages.registered ? event.messages.registered : "You are registered!";
+            rMessages["registered"] = event.messages.registered;
         }
 
         // check if user is checked in
@@ -406,7 +437,7 @@ EventController.getMessages = function(userExecute, eventID, callback){
         }
 
         if(found){
-            rMessages["checkedIn"] = event.messages.checkedIn ? event.messages.checkedInd : "You are checked in!";
+            rMessages["checkedIn"] = event.messages.checkedIn;
         }
 
         if(Object.keys(rMessages).length === 0){
@@ -417,22 +448,55 @@ EventController.getMessages = function(userExecute, eventID, callback){
     })
 }
 
-EventController.getRegistered = function(id, callback){
+EventController.getRegistered = function(adminUser, id, callback){
 
 }
 
-EventController.getCheckedIn = function(id, callback){
+EventController.getCheckedIn = function(adminUser, id, callback){
+
+}
+
+EventController.awardPointsToRegistered = function(adminUser, eventID, callback){
+
+}
+
+EventController.awardPointsToCheckedIn = function(adminUser, eventID, callback){
 
 }
 
 EventController.getAllEvents = function(callback) {
-    Event.find({}, function(err, events){
+    Event.find({}).select('+registeredUsers +checkInData').exec(function(err, events){
         if(err){
             logger.defaultLogger.error("Error retrieving all events. ", err);
             return callback(err)
         }
         return callback(null, events);
     });
+}
+
+EventController.getByID = function(userExecute, eventID, callback){
+    if(!userExecute || !eventID){
+        return callback({error: 'Invalid arguments.', clean: true, code: 400})
+    }
+    let selectProjection = '';
+    if(userExecute.permissions.admin){
+        selectProjection = '+registeredUsers +checkInData +messages.registered +messages.checkedIn';
+    }
+
+    Event.findOne({
+        _id: eventID
+    }).select(selectProjection).exec(function(err, event){
+        if(err){
+            logger.defaultLogger.error(`Error retrieving event ${eventID}. `, err);
+            return callback(err);
+        }
+
+        if(!event){
+            return callback({error: "No event with the given ID exists.", code: 400, clean: true})
+        }
+
+        return callback(null, event);
+    })
 }
 
 module.exports = EventController;

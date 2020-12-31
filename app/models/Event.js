@@ -51,6 +51,12 @@ schema.statics.validateOptions = function(newOptions, callback) {
     return callback(null, toPush);
 }
 
+schema.set('toJSON', {
+    virtuals: true
+});
 
+schema.set('toObject', {
+    virtuals: true
+});
 
 module.exports = mongoose.model('Event', schema);
