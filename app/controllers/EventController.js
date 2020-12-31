@@ -46,6 +46,7 @@ EventController.updateDates = function(adminUser, id, newDates, callback) {
                 logger.defaultLogger.error('Error updating event dates while attempting to update event dates. ', err);
                 return callback(err);
             }
+            logger.logAction(adminUser._id, -1, "Modified event dates.",`Event ID: ${eventID}`)
             return callback(null, event);
         })
 
@@ -76,6 +77,7 @@ EventController.updateOptions = function(adminUser, id, newOptions, callback){
                 logger.defaultLogger.error('Error updating event options while attempting to update event options. ', err);
                 return callback(err);
             }
+            logger.logAction(adminUser._id, -1, "Modified event options.",`Event ID: ${eventID}`)
             return callback(null, event);
         })
     })
@@ -222,6 +224,7 @@ EventController.checkInUser = function(userExecute, userID, eventID, callback){
                     return callback(err);
                 }
 
+                logger.logAction(userExecute._id, userID, "Checked in user to event.",`Event ID: ${eventID}`)
                 return callback(null, {message: "Checked in to event successfully."});
             })
 
@@ -296,6 +299,7 @@ EventController.registerUser = function(userExecute, userID, eventID, callback) 
                     return callback(err);
                 }
 
+                logger.logAction(userExecute._id, userID, "Registered user for event.",`Event ID: ${eventID}`)
                 return callback(null, {message: "Registered for event successfully."});
             })
 
@@ -359,6 +363,7 @@ EventController.unregisterUser = function(userExecute, userID, eventID, callback
                     return callback(err);
                 }
 
+                logger.logAction(userExecute._id, userID, "Unregistered user from event.",`Event ID: ${eventID}`)
                 return callback(null, {message: "Unregistered from event successfully."});
             })
 
