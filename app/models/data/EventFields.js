@@ -42,7 +42,7 @@ let options = {
     public: {
         type: Boolean,
         required: true,
-        default: true
+        default: false
     }
 }
 

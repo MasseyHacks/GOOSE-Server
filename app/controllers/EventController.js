@@ -36,7 +36,7 @@ EventController.updateDates = function(adminUser, id, newDates, callback) {
             _id: id
         }, {
             $set: {
-                'dates': filteredDates
+                dates: filteredDates
             }
         }, {
             new: true
@@ -51,8 +51,33 @@ EventController.updateDates = function(adminUser, id, newDates, callback) {
     });
 }
 
-EventController.updateOptions = function(adminUser, newOptions, callback){
+EventController.updateOptions = function(adminUser, id, newOptions, callback){
+    if(!adminUser || !id || !newOptions){
+        return callback({error: 'Invalid arguments.', clean: true, code: 400});
+    }
 
+    Event.validateOptions(newOptions, function(err, filteredOptions){
+        if(err){
+            logger.defaultLogger.error(`Error validating new options while attempting to update event dates. `, err);
+            return callback(err);
+        }
+        logger.defaultLogger.silly(filteredOptions);
+        Event.findOneAndUpdate({
+            _id: id
+        }, {
+            $set: {
+                options: filteredOptions
+            }
+        }, {
+            new: true
+        }, function(err, event){
+            if(err){
+                logger.defaultLogger.error('Error updating event options while attempting to update event options. ', err);
+                return callback(err);
+            }
+            return callback(null, event);
+        })
+    })
 }
 
 EventController.getRegistered = function(id, callback){
@@ -60,10 +85,6 @@ EventController.getRegistered = function(id, callback){
 }
 
 EventController.getCheckedIn = function(id, callback){
-
-}
-
-EventController.setPublic = function(adminUser, isPublic, callback){
 
 }
 
