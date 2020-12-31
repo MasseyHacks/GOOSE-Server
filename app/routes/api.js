@@ -47,6 +47,12 @@ module.exports = function(router) {
         EventController.updateOptions(req.userExecute, req.body.id, req.body.newOptions, logger.defaultResponse(req, res));
     })
 
+    // Admin
+    // Get all events
+    router.get('/getAllEvents', permissions.isAdmin, function(req, res){
+        EventController.getAllEvents(logger.defaultResponse(req, res));
+    })
+
     // General
     // Get a filtered list of events
     router.get('/getFilteredEvents', permissions.isVerified, function(req, res){
