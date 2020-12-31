@@ -258,14 +258,14 @@ UserController.verify = function (token, callback, ip) {
             logger.defaultLogger.debug('Verify token invalid.');
             return callback({
                 error: 'Invalid Token',
-                code: 401
+                code: 401, clean: true
             });
         }
 
         if (payload.type != 'verification' || !payload.exp || Date.now() >= payload.exp * 1000) {
             return callback({
                 error: ' Invalid Token.',
-                code: 403
+                code: 403, clean: true
             });
         }
 
@@ -304,14 +304,14 @@ UserController.magicLogin = function (token, callback, ip) {
             logger.defaultLogger.debug('Magic login token invalid.');
             return callback({
                 error: 'Invalid Token',
-                code: 401
+                code: 401, clean: true
             });
         }
 
         if (payload.type != 'magicJWT' || !payload.exp || Date.now() >= payload.exp * 1000) {
             return callback({
                 error: ' Invalid Token.',
-                code: 403
+                code: 403, clean: true
             });
         }
 
@@ -322,7 +322,7 @@ UserController.magicLogin = function (token, callback, ip) {
 
                 return callback({
                     error: 'Something went wrong.',
-                    code: 500
+                    code: 500, clean: true
                 });
             }
 
@@ -351,7 +351,7 @@ UserController.magicLogin = function (token, callback, ip) {
             } else {
                 return callback({
                     error: 'Invalid Token',
-                    code: 401
+                    code: 401, clean: true
                 });
             }
         });
@@ -373,7 +373,7 @@ UserController.sendVerificationEmail = function (token, callback, ip) {
         if (!user.status.active) {
             return callback({
                 error: 'Account is not active. Please contact an administrator for assistance.',
-                code: 403
+                code: 403, clean: true
             })
         }
 
@@ -494,14 +494,14 @@ UserController.resetPassword = function (token, password, callback, ip) {
             logger.defaultLogger.debug('Password reset token invalid.');
             return callback({
                 error: 'Invalid Token',
-                code: 401
+                code: 401, clean: true
             });
         }
 
         if (payload.type != 'password-reset' || !payload.exp || Date.now() >= payload.exp * 1000) {
             return callback({
                 error: ' Invalid Token.',
-                code: 403
+                code: 403, clean: true
             });
         }
 
@@ -517,7 +517,7 @@ UserController.resetPassword = function (token, password, callback, ip) {
             if (payload.iat * 1000 < user.passwordLastUpdated) {
                 return callback({
                     error: 'Invalid Token',
-                    code: 401
+                    code: 401, clean: true
                 });
             }
 
@@ -579,31 +579,31 @@ UserController.createUser = function (email, firstName, lastName, password, call
         if (!settings.registrationOpen) {
             return callback({
                 error: 'Sorry, registration is not open.',
-                code: 403
+                code: 403, clean: true
             });
         } else {
             if (!validator.isEmail(email)) {
                 return callback({
                     error: 'Invalid Email Format',
-                    code: 400
+                    code: 400, clean: true
                 });
             }
 
             if (!password || password.length < 6) {
-                return callback({error: 'Password must be 6 or more characters.', code: 400}, false);
+                return callback({error: 'Password must be 6 or more characters.', code: 400, clean: true}, false);
             }
 
             // Special stuff
             if (password == 'Password123' && firstName == 'Adam') {
-                return callback({error: 'Hi adam, u have a bad passwd', code: 418}, false);
+                return callback({error: 'Hi adam, u have a bad passwd', code: 418, clean: true}, false);
             }
 
             if (firstName.length > 50 || lastName.length > 50) {
-                return callback({error: 'Name is too long!', code: 400});
+                return callback({error: 'Name is too long!', code: 400, clean: true});
             }
 
             if (email.length > 50) {
-                return callback({error: 'Email is too long!', code: 400});
+                return callback({error: 'Email is too long!', code: 400, clean: true});
             }
 
             email = email.toLowerCase();
@@ -612,7 +612,7 @@ UserController.createUser = function (email, firstName, lastName, password, call
                 if (!err || user) {
                     return callback({
                         error: 'An account for this email already exists.',
-                        code: 400
+                        code: 400, clean: true
                     });
                 } else {
 
@@ -661,7 +661,7 @@ UserController.superToken = function (userExcute, userID, callback) {
         if (err || !user) {
             logger.defaultLogger.error(err);
             logger.logAction(userExcute.id, userID, "Tried to generate super Link", 'EXECUTOR IP: ' + userExcute.ip + " | Error when generating superLink" + err);
-            return callback({error: "Error has occured"})
+            return callback({error: "Error has occurred.", clean: true})
         }
 
         var token = user.generateMagicToken();
@@ -702,7 +702,7 @@ UserController.loginWithToken = function (token, callback, ip) {
         if (!user.status.active) {
             return callback({
                 error: 'Account is not active. Please contact an administrator for assistance.',
-                code: 403
+                code: 403, clean: true
             })
         }
 
@@ -718,15 +718,15 @@ UserController.loginWithPassword = function (email, password, callback, ip) {
 
     if (!email || email.length === 0) {
         return callback({
-            error: 'Please enter your email',
-            code: 400
+            error: 'Please enter your email.',
+            code: 400, clean: true
         });
     }
 
     if (!password || password.length === 0) {
         return callback({
-            error: 'Please enter your password',
-            code: 400
+            error: 'Please enter your password.',
+            code: 400, clean: true
         });
     }
 
@@ -760,7 +760,7 @@ UserController.loginWithPassword = function (email, password, callback, ip) {
 
                 return callback({
                     error: 'Invalid credentials ;)',
-                    code: 401
+                    code: 401, clean: true
                 });
 
             } else if (!!user && user.permissions.checkin) {
@@ -768,15 +768,15 @@ UserController.loginWithPassword = function (email, password, callback, ip) {
             }
 
             return callback({
-                error: 'Invalid credentials',
-                code: 401
+                error: 'Invalid credentials.',
+                code: 401, clean: true
             });
         }
 
         if (!user.status.active) {
             return callback({
                 error: 'Account is not active. Please contact an administrator for assistance.',
-                code: 403
+                code: 403, clean: true
             })
         }
 
@@ -801,7 +801,7 @@ UserController.updateProfile = function (userExecute, id, profile, callback) {
         // Already submitted
         if (validationUser.profile.signature !== -1) {
             return callback({
-                error: 'Sorry, you have already submitted.'
+                error: 'Sorry, you have already submitted.', code: 400, clean: true
             });
         }
 
@@ -821,13 +821,13 @@ UserController.updateProfile = function (userExecute, id, profile, callback) {
 
                 if (!userExecute.admin && now < times.timeOpen) {
                     return callback({
-                        error: 'Registration opens in ' + moment(times.timeOpen).fromNow() + '!'
+                        error: 'Registration opens in ' + moment(times.timeOpen).fromNow() + '!', code: 400, clean: true
                     });
                 }
 
                 if (!userExecute.admin && now > times.timeClose) {
                     return callback({
-                        error: 'Sorry, registration is closed.'
+                        error: 'Sorry, registration is closed.', code: 400, clean: true
                     });
                 }
 
@@ -863,7 +863,7 @@ UserController.updateProfile = function (userExecute, id, profile, callback) {
 
                         if (user.status.released && (user.status.rejected || user.status.waitlisted || user.status.admitted)) {
                             return callback({
-                                message: 'Sorry, registration is closed.'
+                                message: 'Sorry, registration is closed.', code: 400, clean: true
                             });
                         }
 
@@ -1188,14 +1188,14 @@ UserController.remove = function (adminUser, userID, callback) {
                     _id: userID
                 }, function (err) {
                     if (err) {
-                        return callback({error: 'Unable to delete user'})
+                        return callback({error: 'Unable to delete user.', clean: true})
                     }
 
                     return callback(null, {message: 'Success'})
                 });
             });
         } else {
-            return callback({error: 'Unable to delete user'})
+            return callback({error: 'Unable to delete user.', clean: true})
         }
     });
 };

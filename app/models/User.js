@@ -101,7 +101,7 @@ schema.statics.generateHash = function (password) {
 schema.statics.resetAdmissionState = function (adminUser, userID, callback) {
     const logger = require('../services/logger');
     if (!adminUser || !userID) {
-        return callback({error: 'Invalid arguments'});
+        return callback({error: 'Invalid arguments.', code: 400, clean: true});
     }
 
     module.exports.findOneAndUpdate({
@@ -156,7 +156,7 @@ schema.statics.admitUser = function (adminUser, userID, callback) {
     logger.defaultLogger.debug('Trying to admit', userID);
 
     if (!adminUser || !userID) {
-        return callback({error: 'Invalid arguments'});
+        return callback({error: 'Invalid arguments.', code: 400, clean: true});
     }
 
     Settings.findOne({}, function (err, settings) {
@@ -203,7 +203,7 @@ schema.statics.admitUser = function (adminUser, userID, callback) {
 schema.statics.rejectUser = function (adminUser, userID, callback) {
 
     if (!adminUser || !userID) {
-        return callback({error: 'Invalid arguments'});
+        return callback({error: 'Invalid arguments.', code: 400, clean: true});
     }
 
     module.exports.findOneAndUpdate({
@@ -270,14 +270,14 @@ schema.statics.getByToken = function (token, callback) {
         if (err || !payload) {
             return callback({
                 error: 'Invalid Token',
-                code: 401
+                code: 401, clean: true
             });
         }
 
         if (payload.type != 'authentication' || !payload.exp || Date.now() >= payload.exp * 1000) {
             return callback({
                 error: ' Invalid Token',
-                code: 403
+                code: 403, clean: true
             });
         }
 
@@ -293,7 +293,7 @@ schema.statics.getByToken = function (token, callback) {
             if (payload.iat * 1000 < user.passwordLastUpdated) {
                 return callback({
                     error: 'Invalid Token',
-                    code: 401
+                    code: 401, clean: true
                 });
             }
             return callback(err, user);
@@ -338,23 +338,23 @@ schema.statics.validateProfile = function (profile, callback) {
             for (var i = 0; i < keys.length; i++) {
                 if ('type' in runner[keys[i]]) {
                     if (profile.signature !== -1 && runner[keys[i]].mandatory && !userpath[keys[i]]) {
-                        return callback({error: 'Field "' + keys[i] + '" is required'})
+                        return callback({error: 'Field "' + keys[i] + '" is required.', code: 400, clean: true})
                     }
 
                     if (runner[keys[i]].maxlength && userpath[keys[i]] && userpath[keys[i]].length > runner[keys[i]].maxlength) {
-                        return callback({error: 'Field "' + keys[i] + '" exceeds character limit'})
+                        return callback({error: 'Field "' + keys[i] + '" exceeds character limit.', code: 400, clean: true})
                     }
 
                     if (runner[keys[i]]['questionType'] && ['dropdown', 'multiradio'].indexOf(runner[keys[i]]['questionType']) != -1) {
                         if (runner[keys[i]]['enum']['values'].split('|').indexOf(userpath[keys[i]]) == -1 && (userpath[keys[i]] || runner[keys[i]].mandatory) && !(profile.signature === -1 && !userpath[keys[i]])) {
-                            return callback({error: 'Field "' + keys[i] + '" with value "' + userpath[keys[i]] + '" is invalid'})
+                            return callback({error: 'Field "' + keys[i] + '" with value "' + userpath[keys[i]] + '" is invalid.', code: 400, clean: true})
                         }
                     }
 
                     if (runner[keys[i]]['questionType'] && runner[keys[i]]['questionType'] == 'multicheck' && ((userpath[keys[i]] && userpath[keys[i]].length > 0) || runner[keys[i]].mandatory)) {
                         for (var r in userpath[keys[i]]) {
                             if (runner[keys[i]]['enum']['values'].split('|').indexOf(userpath[keys[i]][r]) == -1 && !(profile.signature === -1 && !userpath[keys[i]][r])) {
-                                return callback({error: 'Field "' + keys[i] + '" with value "' + userpath[keys[i]][r] + '"is invalid'})
+                                return callback({error: 'Field "' + keys[i] + '" with value "' + userpath[keys[i]][r] + '"is invalid.', code: 400, clean: true})
                             }
                         }
                     }
@@ -364,29 +364,29 @@ schema.statics.validateProfile = function (profile, callback) {
                         var birthdayDate = new Date();
                         birthdayDate.setFullYear(parseInt(birthdayValues[0]), parseInt(birthdayValues[1]) - 1, parseInt(birthdayValues[2]));
                         if (birthdayValues.length != 3 || userpath[keys[i]].length != runner[keys[i]].maxlength) {
-                            return callback({error: 'Birthday given in incorrect format'})
+                            return callback({error: 'Birthday given in incorrect format.', code: 400, clean: true})
                         }
                         else if((birthdayDate.getFullYear() != parseInt(birthdayValues[0])) || (birthdayDate.getMonth() != parseInt(birthdayValues[1]) - 1) || (birthdayDate.getDate() != parseInt(birthdayValues[2]))){
-                            return callback({error: 'Invalid birthday'})
+                            return callback({error: 'Invalid birthday.', code: 400, clean: true})
                         }
                         else if((new Date()).getFullYear() - birthdayDate.getFullYear() > 130){
-                            return callback({error: 'User claims they are over 130 years old'})
+                            return callback({error: 'User claims they are over 130 years old.', code: 400, clean: true})
                         }
                     }
 
                     if (profile.signature !== -1 && runner[keys[i]]['questionType'] && runner[keys[i]]['questionType'] == 'phoneNumber') {
                         var phoneNumber = userpath[keys[i]];
                         if(phoneNumber.length > runner[keys[i]].maxlength){
-                            return callback({error: 'Phone number is too long'})
+                            return callback({error: 'Phone number is too long.', code: 400, clean: true})
                         } else if(isNaN(phoneNumber)) {
-                            return callback({error: 'Phone number is not a number'})
+                            return callback({error: 'Phone number is not a number.', code: 400, clean: true})
                         }
 
                     }
 
                     if (profile.signature !== -1 && runner[keys[i]]['questionType'] && runner[keys[i]]['questionType'] == 'contract') {
                         if (!userpath[keys[i]]) {
-                            return callback({error: 'Contract field "' + keys[i] + '" must be agreed to'})
+                            return callback({error: 'Contract field "' + keys[i] + '" must be agreed to.', code: 400, clean: true})
                         }
                     }
                 } else {
@@ -406,7 +406,7 @@ schema.statics.validateProfile = function (profile, callback) {
         const logger = require('../services/logger');
         logger.defaultLogger.error('Error while validating user profile. ', e)
 
-        return callback({ error: 'You broke something...' })
+        return callback({ error: 'You broke something...', clean: true})
 
     }
 };

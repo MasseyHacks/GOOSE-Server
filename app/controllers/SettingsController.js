@@ -118,7 +118,7 @@ SettingsController.getPendingSchools = function(callback) {
         {},
         function(err, settings) {
             if (err || !settings) {
-                return callback({'error':'Unable to find settings'})
+                return callback({'error':'Unable to find settings.', clean: true})
             }
 
             return callback(null, settings.pendingSchools)
@@ -143,7 +143,7 @@ SettingsController.approvePendingSchool = function(adminUser, schoolName, callba
             new: true
         }, function(err, settings) {
             if (err || !settings) {
-                return callback({'error':'Unable to perform action'})
+                return callback({'error':'Unable to perform action.', clean: true})
             }
 
             logger.logAction(adminUser._id, -1, 'Accepted pending school.', 'EXECUTOR IP: ' + adminUser.ip + ' | ' + schoolName);
@@ -164,7 +164,7 @@ SettingsController.rejectPendingSchool = function(adminUser, schoolName, callbac
             new: true
         }, function(err, settings) {
             if (err || !settings) {
-                return callback({'error':'Unable to perform action'})
+                return callback({'error':'Unable to perform action.', clean: true})
             }
 
             logger.logAction(adminUser._id, -1, 'Rejected pending school.', 'EXECUTOR IP: ' + adminUser.ip + ' | ' + schoolName);
@@ -195,7 +195,7 @@ SettingsController.requestSchool = function(user, schoolName, callback) {
             new: true
         }, function(err, settings) {
             if (err || !settings) {
-                return callback({'error':'Unable to add school (It\'s probably already on the list!)'})
+                return callback({'error':'Unable to add school (It\'s probably already on the list!)', clean: true})
             }
             const logger = require('../services/logger');
             logger.logAction(user._id, -1, 'Requested to add school.', 'EXECUTOR IP: ' + user.ip + ' | ' + schoolName);
@@ -206,11 +206,11 @@ SettingsController.requestSchool = function(user, schoolName, callback) {
 
 SettingsController.modifyTime = function(user, newTime, callback) {
     if (newTime.timeOpen > newTime.timeClose) {
-        return callback({'error': 'Closing time is less than open time'})
+        return callback({'error': 'Closing time is less than open time.', code: 400, clean: true})
     }
 
     if (newTime.timeConfirm < newTime.timeClose) {
-        return callback({'error': 'Confirmation deadline before application close'})
+        return callback({'error': 'Confirmation deadline before application close.', code: 400, clean: true})
     }
 
     Settings.findOneAndUpdate({},
@@ -222,7 +222,7 @@ SettingsController.modifyTime = function(user, newTime, callback) {
             new: true
         }, function(err, settings) {
             if (err || !settings) {
-                return callback({'error':'Unable to update time'})
+                return callback({'error':'Unable to update time.', clean: true})
             }
             const logger = require('../services/logger');
             logger.logAction(user._id, -1, 'Modified global time settings.', 'EXECUTOR IP: ' + user.ip + ' | ' + JSON.stringify(newTime));
@@ -233,7 +233,7 @@ SettingsController.modifyTime = function(user, newTime, callback) {
 
 SettingsController.modifyLimit = function(user, limit, callback) {
     if (!limit.maxParticipants) {
-        return callback({'error': 'Data not found'})
+        return callback({'error': 'Data not found.', clean: true})
     }
 
     Settings.findOneAndUpdate({},
@@ -243,7 +243,7 @@ SettingsController.modifyLimit = function(user, limit, callback) {
             new: true
         }, function(err, settings) {
             if (err || !settings) {
-                return callback({'error':'Unable to update limit'})
+                return callback({'error':'Unable to update limit.', clean: true})
             }
 
             logger.logAction(user._id, -1, 'Modified participant limit to ' + limit.maxParticipants + '.', 'EXECUTOR IP: ' + user.ip);
@@ -331,11 +331,11 @@ SettingsController.getLog = function(query, callback){
 SettingsController.getApplications = function(req, callback) {
     Settings.getSettings(function(err, settings) {
         if (err || !settings) {
-            return callback({error:'Unable to get Settings', code: 500})
+            return callback({error:'Unable to get Settings', clean: true})
         }
 
         if (!req.userExecute.permissions.admin && !settings.applicationsReleased) {
-            return callback({error:'Access Denied', code:403})
+            return callback({error:'Access Denied.', code:403, clean: true})
         }
 
         return callback(null, UserFields.profile)

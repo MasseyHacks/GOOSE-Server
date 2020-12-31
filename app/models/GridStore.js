@@ -17,7 +17,7 @@ module.exports = {
 
         gfs.files.findOne({ filename: filename }, (err, file) => {
             if (file) {
-                return callback({ error: 'File exists!'})
+                return callback({ error: 'File exists!', code: 400, clean: true})
             }
 
             var writestream = gfs.createWriteStream({
@@ -41,14 +41,14 @@ module.exports = {
             if (err || !file) {
                 return callback({
                     error: 'File not found',
-                    code: 404
+                    code: 404, clean: true
                 });
             }
 
             if (file.metadata != user._id && !(user.permissions.level >= 3)) {
                 return callback({
                     error: 'Access Denied',
-                    code: 403
+                    code: 403, clean: true
                 });
             }
 

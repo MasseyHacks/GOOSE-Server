@@ -9,7 +9,7 @@ module.exports = {
             active: true
         }).select('+memberIDs').exec(function(err, teams){
             if(err){
-                return callback({error: "Unable to query teams!", code: 500});
+                return callback({error: "Unable to query teams!", code: 500, clean: true});
             }
 
             // Iterate through teams that are active
@@ -21,7 +21,7 @@ module.exports = {
                 }, false);
             }
 
-            return callback({message: "Team deactivations queued. Check the log for any errors.", code: 200});
+            return callback({message: "Team deactivations queued. Check the log for any errors.", code: 200, clean: true});
         })
     }
 }

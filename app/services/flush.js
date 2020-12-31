@@ -15,13 +15,13 @@ module.exports = {
         //check if the given queue is valid
         if(!queue || validTemplates[queue]['queueName'] === null || !validTemplates[queue]['canQueue']){//invalid
             logger.defaultLogger.error(`Invalid email queue ${queue}!`);
-            return callback({error: 'Invalid email queue.'});
+            return callback({error: 'Invalid email queue.', code: 400, clean: true});
         }
         else{//valid
             //return all emails from that queue
             Settings.findOne({}, function(err, settings) {
                 if(err){
-                    return callback({error: 'Cannot find the email queue.'});
+                    return callback({error: 'Cannot find the email queue.', clean: true});
                 }
                 else {
                     logger.defaultLogger.debug('Flushing Queue...', settings.emailQueue[validTemplates[queue]['queueName']]);
@@ -38,7 +38,7 @@ module.exports = {
                         //return user properties and send email
                         User.getByEmail(element, function (error, user) {
                             if (error) {
-                                return callback({error: 'The provided email does not correspond to a user.'});
+                                return callback({error: 'The provided email does not correspond to a user.', code: 400, clean: true});
                             }
                             else {
                                 //define the dates
@@ -125,7 +125,7 @@ module.exports = {
             else{
                 User.getByEmail(userEmail, function (err, user) {
                     if(err || !user){
-                        return callback({error: 'The provided email does not correspond to a user.'});
+                        return callback({error: 'The provided email does not correspond to a user.', code: 400, clean: true});
                     }
 
                     //define the dates

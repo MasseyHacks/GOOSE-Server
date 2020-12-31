@@ -43,7 +43,7 @@ TeamController.checkIfAutoAdmit = function (adminUser, teamCode, callback) {
         .populate('memberNames')
         .exec(function (err, team) {
             if (err || !team) { // Team doesn't exist
-                return callback({ error : 'Team doesn\'t exist', code: 404 });
+                return callback({ error : 'Team doesn\'t exist', code: 404, clean: true });
             }
 
             var numAdmitted = 0;
@@ -65,7 +65,7 @@ TeamController.checkIfAutoAdmit = function (adminUser, teamCode, callback) {
 
             logger.defaultLogger.debug(`Team ${teamCode} not eligible for auto admit.`)
 
-            return callback({ error : 'Team doesn\'t meet criteria'});
+            return callback({ error : 'Team doesn\'t meet criteria.', code: 400, clean: true});
         });
 
 };
@@ -129,20 +129,20 @@ TeamController.teamReject = function(adminUser, teamCode, callback) {
 TeamController.createTeam = function(id, teamName, callback) {
 
     if (!id || !teamName) {
-        return callback({error : 'Invalid arguments'});
+        return callback({error: 'Invalid arguments.', clean: true, code: 400});
     }
 
     if (teamName.length > 50) {
-        return callback({error : 'Name is too long! (Max 50)'})
+        return callback({error : 'Name is too long! (Max 50)', clean: true})
     }
 
     User.getByID(id, function(err, user) {
         if (err || !user) {
-            return callback({error : 'Unable to get user'});
+            return callback({error : 'Unable to get user.', clean: true});
         }
 
         if (user.teamCode && user.teamCode.length != 0) {
-            return callback({error : 'You are already in a team!'});
+            return callback({error : 'You are already in a team!', clean: true});
         }
 
         Team.create({
@@ -152,7 +152,8 @@ TeamController.createTeam = function(id, teamName, callback) {
         }, function(err, team) {
 
             if (err) {
-                return callback({error: 'Unable to create team'})
+                logger.defaultLogger.error(`Error creating team while attempting to create a team. `, err);
+                return callback({error: 'Unable to create team.', clean: true})
             }
 
             User.findOneAndUpdate({
@@ -176,16 +177,16 @@ TeamController.createTeam = function(id, teamName, callback) {
 TeamController.joinTeam = function(id, teamCode, callback) {
 
     if (!id || !teamCode) {
-        return callback({error : 'Invalid arguments'});
+        return callback({error: 'Invalid arguments.', clean: true, code: 400});
     }
 
     User.getByID(id, function(err, user) {
         if (err || !user) {
-            return callback({error : 'Unable to get user'});
+            return callback({error : 'Unable to get user.', clean: true});
         }
 
         if (user.teamCode && user.teamCode.length != 0) {
-            return callback({error : 'You are already in a team!'});
+            return callback({error : 'You are already in a team!', code: 400, clean: true});
         }
 
         Team
@@ -196,7 +197,7 @@ TeamController.joinTeam = function(id, teamCode, callback) {
             .select('+memberIDs')
             .exec(function (err, team) {
                 if (err || !team) { // Team doesn't exist yet
-                    return callback({ error : 'Team doesn\'t exist or has been marked inactive.', code: 404 });
+                    return callback({ error : 'Team doesn\'t exist or has been marked inactive.', code: 404, clean: true });
                 }
 
                 if (team.memberIDs.length < process.env.TEAM_MAX_SIZE) { // Can still join team
@@ -213,7 +214,7 @@ TeamController.joinTeam = function(id, teamCode, callback) {
                         .populate('memberNames')
                         .exec(function(err, newTeam) {
                             if (err || !newTeam) {
-                                return callback({ error : 'Unable to join team' });
+                                return callback({ error : 'Unable to join team.', clean: true });
                             }
 
                             User.findOneAndUpdate({
@@ -226,7 +227,8 @@ TeamController.joinTeam = function(id, teamCode, callback) {
                                 new: true
                             }, function(err, newUser) {
                                 if (err || !newUser) {
-                                    return callback({error : 'Something went wrong' });
+                                    logger.defaultLogger.error(`Error updating user ${id} while attempting to join team ${newTeam.code}. `, err);
+                                    return callback({error : 'Something went wrong.', clean: true });
                                 }
 
                                 // Substitutes user objects with their names
@@ -243,7 +245,7 @@ TeamController.joinTeam = function(id, teamCode, callback) {
                             });
                         });
                 } else {
-                    return callback({ error : 'Team is full', code: 400 });
+                    return callback({ error : 'Team is full.', code: 400, clean: true });
                 }
             });
     });
@@ -252,7 +254,7 @@ TeamController.joinTeam = function(id, teamCode, callback) {
 TeamController.leaveTeam = function(id, callback) {
 
     if (!id) {
-        return callback({error : 'Invalid arguments'});
+        return callback({error: 'Invalid arguments.', clean: true, code: 400});
     }
 
     User.getByID(id, function(err, user) {
@@ -261,7 +263,7 @@ TeamController.leaveTeam = function(id, callback) {
         }
 
         if (user.teamCode.length == 0) {
-            return callback({error : 'You are not in a team'});
+            return callback({error : 'You are not in a team.', code: 400, clean: true});
         }
 
         User.findOneAndUpdate({
@@ -313,7 +315,7 @@ TeamController.leaveTeam = function(id, callback) {
 TeamController.getTeam = function(id, callback) {
 
     if (!id) {
-        return callback({error : 'Invalid arguments'});
+        return callback({error: 'Invalid arguments.', clean: true, code: 400});
     }
 
     User.getByID(id, function(err, user) {
@@ -332,7 +334,7 @@ TeamController.getTeam = function(id, callback) {
             .populate('memberNames')
             .exec(function (err, team) {
                 if (err || !team) { // Team doesn't exist
-                    return callback({ error : 'Team doesn\'t exist', code: 404 });
+                    return callback({ error : 'Team doesn\'t exist', code: 404, clean: true });
                 }
 
                 // Substitutes user objects with their names
@@ -347,7 +349,7 @@ TeamController.getTeam = function(id, callback) {
 TeamController.getByCode = function(code, callback) {
 
     if (!code) {
-        return callback({error : 'Invalid arguments'});
+        return callback({error: 'Invalid arguments.', clean: true, code: 400});
     }
 
     Team
@@ -357,7 +359,7 @@ TeamController.getByCode = function(code, callback) {
         .populate('memberNames')
         .exec(function (err, team) {
             if (err || !team) { // Team doesn't exist
-                return callback({ error : 'Team doesn\'t exist', code: 404 });
+                return callback({ error : 'Team doesn\'t exist', code: 404, clean: true });
             }
 
             // Substitutes user objects with their names
@@ -371,7 +373,7 @@ TeamController.getByCode = function(code, callback) {
 
 TeamController.removeFromTeam = function (userExcute, id, code, callback) {
     if (!code || !id) {
-        return callback({error: 'Invalid arguments'})
+        return callback({error: 'Invalid arguments.', code: 400, clean: true})
     }
 
     User.findOne({
@@ -379,11 +381,11 @@ TeamController.removeFromTeam = function (userExcute, id, code, callback) {
     }, function (err, user) {
         if (err || !user) {
             logger.defaultLogger.error(err)
-            return callback({ error : 'User doesn\'t exist' });
+            return callback({ error : 'User doesn\'t exist.', clean: true });
         }
 
         if (user.teamCode !== code) {
-            return callback({ error : 'The user doesn\'t belong in this team'})
+            return callback({ error : 'The user doesn\'t belong in this team.', clean: true})
         }
 
         TeamController.leaveTeam(id, function (err, data) {
@@ -409,21 +411,21 @@ TeamController.removeFromTeam = function (userExcute, id, code, callback) {
 
 TeamController.deleteTeamByCode = function (userExcute, code, callback) {
     if (!code) {
-        return callback({error : 'Invalid arguments'});
+        return callback({error: 'Invalid arguments.', clean: true, code: 400});
     }
     Team.findOne({
         code: code
     }, function (err, team) {
         if (err || !team) {
-            return callback({ error : 'Team doesn\'t exist', code: 404 });
+            return callback({ error : 'Team doesn\'t exist', code: 404, clean: true });
         }
         User.updateMany({teamCode: code}, {teamCode: ''}, function (err) {
             Team.findOneAndRemove({
                 code: code
             }, function (err) {
                 if (err) {
-                    loggger.defaultLogger.error(`Unable to delete team ${code}. `, err);
-                    return callback({error : 'Unable to delete Team'});
+                    logger.defaultLogger.error(`Unable to delete team ${code}. `, err);
+                    return callback({error : 'Unable to delete team.', clean: true});
                 }
                 logger.logAction(userExcute.id, -1, 'Deleted the team: ' + team.name + ' (' + code + ')', 'EXECUTOR IP: ' + userExcute.ip);
 
@@ -451,7 +453,7 @@ TeamController.getFields = function (userExcute, callback) {
 TeamController.getByQuery = function (adminUser, query, callback) {
 
     if (!query || !query.page || !query.size) {
-        return callback({error : 'Invalid arguments'});
+        return callback({error: 'Invalid arguments.', clean: true, code: 400});
     }
 
     var page    = parseInt(query.page);

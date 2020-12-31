@@ -83,7 +83,7 @@ module.exports = {
 
         //check if the given queue is valid
         if(validTemplates[queue] === null){//invalid
-            return callback({error: 'Invalid email queue.'});
+            return callback({error: 'Invalid email queue.', code: 400, clean: true});
         }
         else{//valid
             var pushObj = {};
@@ -97,7 +97,7 @@ module.exports = {
             }, function(err,settings){
                 if(err){
                     logger.defaultLogger.error(err);
-                    return callback({error: 'Cannot add email to the queue.'});
+                    return callback({error: 'Cannot add email to the queue.', clean: true});
                 }
                 else{
                     return callback(null,{message:'Success'});
@@ -111,12 +111,12 @@ module.exports = {
     returnTemplate : function(templateName,callback){
         templateName = templateName.toLowerCase();
         if(!templateName || validTemplates[templateName] == null){//invalid
-            return callback({error: 'Invalid email template!'});
+            return callback({error: 'Invalid email template!', code: 400, clean: true});
         }
         else{
             fs.readFile(validTemplates[templateName]['templateLocation'],'utf8',function(err, data) {
                 if (err){
-                    return callback({error: 'File read failed'});
+                    return callback({error: 'File read failed.', clean: true});
                 } else {
                     return callback(null, {email: data})
                 }
