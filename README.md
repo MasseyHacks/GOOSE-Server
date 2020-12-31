@@ -43,6 +43,6 @@ To start goose, run
 npm start
 ```
 
-Congrats, the Goose server should now be running!
+Congrats, the GOOSE server should now be running!
 ___
 Developed By: Henry Tu, James Xu, Ryan Zhang, David Hui
