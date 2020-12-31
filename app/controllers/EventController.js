@@ -442,7 +442,7 @@ EventController.getMessages = function(userExecute, id, callback){
         }
 
         if(!event){
-            return callback({error: "The given event does not exist or you do not have permission to view its messages."});
+            return callback({error: "The given event does not exist or you do not have permission to view its messages.", code: 404, clean: true});
         }
 
         // admin gets all messages
@@ -471,7 +471,7 @@ EventController.getMessages = function(userExecute, id, callback){
         }
 
         if(Object.keys(rMessages).length === 0){
-            return callback({error: "The given event does not exist or you do not have permission to view its messages."});
+            return callback({error: "The given event does not exist or you do not have permission to view its messages.", code: 404, clean: true});
         }
 
         return callback(null, rMessages);
