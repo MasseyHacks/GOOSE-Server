@@ -25,6 +25,11 @@ let dates = {
         type: Number,
         required: true,
         default: 0
+    },
+    finished: {
+        type: Number,
+        required: true,
+        default: -1
     }
 }
 
@@ -69,6 +74,12 @@ let messages = {
         select: false,
         required: true,
         default: "You are checked in!"
+    },
+    finished: {
+        type: String,
+        select: false,
+        required: true,
+        default: "Thanks for participating!"
     }
 }
 

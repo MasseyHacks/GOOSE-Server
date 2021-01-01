@@ -49,6 +49,10 @@ schema.statics.validateDates = function(newDates, callback) {
     if(toPush.checkInOpen < toPush.registrationOpen){
         return callback({error: "Check in opens before registration.", clean: true, code: 400});
     }
+
+    if(toPush.finished !== -1 && toPush.finished < toPush.event){
+        return callback({error: "Event finishes before it starts.", clean: true, code: 400});
+    }
     return callback(null, toPush);
 }
 

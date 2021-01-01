@@ -147,7 +147,7 @@ EventController.getFilteredEvents = function(userExecute, callback) {
         return callback({error: 'Invalid arguments.', clean: true, code: 400})
     }
 
-    Event.find({}).select('+registeredUsers +checkInData').exec(function(err,events){
+    Event.find({}).select('+registeredUsers +checkInData').sort({'dates.event': "asc"}).exec(function(err,events){
         if(err) {
             logger.defaultLogger.error(`Error querying event while attempting to get filtered events. `, err);
             return callback(err);
@@ -188,12 +188,9 @@ EventController.getFilteredEvents = function(userExecute, callback) {
             }
 
             eventsR.push(eventInfo.toObject());
-            logger.defaultLogger.debug("Hello");
             // delete eventsR[eventsR.length-1].registeredUsers;
 
         }
-
-        logger.defaultLogger.silly(eventsR);
 
         return callback(null, eventsR);
     })
@@ -232,7 +229,6 @@ EventController.checkInUser = function(userExecute, userID, eventID, checkInCode
             return callback({error: "The given event does not exist or you have already checked in to it.", clean: true, code: 400});
         }
 
-        logger.defaultLogger.silly(event)
 
         if(event.registeredUsers.indexOf(userID) === -1) {
             if(!event.options.public){
@@ -281,7 +277,7 @@ EventController.checkInUser = function(userExecute, userID, eventID, checkInCode
             }
 
             if(event.registeredUsers.indexOf(userID) === -1){
-                queryObj["$push"]["events"]["registered"] = userID
+                queryObj["$push"]["events.registered"] = eventID
             }
 
             // update the user as well
@@ -448,7 +444,7 @@ EventController.getMessages = function(userExecute, id, callback){
     }
     Event.findOne({
         _id: id
-    }).select('messages.registered messages.checkedIn checkInData registeredUsers').exec(function(err, event){
+    }).select('messages checkInData registeredUsers dates').exec(function(err, event){
         if(err){
             logger.defaultLogger.error(`Error querying event messages for ${id}. `, err);
             return callback(err);
@@ -483,6 +479,11 @@ EventController.getMessages = function(userExecute, id, callback){
             rMessages["checkedIn"] = event.messages.checkedIn;
         }
 
+        if(event.registeredUsers.indexOf(userExecute._id) !== -1 && event.dates.finished < Date.now()){
+
+            rMessages["finished"] = event.messages.finished;
+        }
+
         if(Object.keys(rMessages).length === 0){
             return callback({error: "The given event does not exist or you do not have permission to view its messages.", code: 404, clean: true});
         }
@@ -508,7 +509,7 @@ EventController.awardPointsToCheckedIn = function(adminUser, eventID, callback){
 }
 
 EventController.getAllEvents = function(callback) {
-    Event.find({}).select('+registeredUsers +checkInData').exec(function(err, events){
+    Event.find({}).select('+registeredUsers +checkInData').sort({'dates.event': "asc"}).exec(function(err, events){
         if(err){
             logger.defaultLogger.error("Error retrieving all events. ", err);
             return callback(err)
@@ -523,7 +524,7 @@ EventController.getByID = function(userExecute, id, callback){
     }
     let selectProjection = '+registeredUsers +checkInData';
     if(userExecute.permissions.admin){
-        selectProjection += ' +messages.registered +messages.checkedIn +options.checkInCode';
+        selectProjection += ' +messages.registered +messages.checkedIn +messages.finished +options.checkInCode';
     }
 
     Event.findOne({
