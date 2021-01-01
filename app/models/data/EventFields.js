@@ -62,6 +62,7 @@ let options = {
     }
 }
 
+// make sure to update the projection in EventController.getByID after adding a new message
 let messages = {
     registered: {
         type: String,
