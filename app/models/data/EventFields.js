@@ -43,6 +43,17 @@ let options = {
         type: Boolean,
         required: true,
         default: false
+    },
+    checkInCodeRequired: {
+        type: String,
+        required: true,
+        default: true
+    },
+    checkInCode: {
+        type: String,
+        select: false,
+        required: true,
+        default: ""
     }
 }
 

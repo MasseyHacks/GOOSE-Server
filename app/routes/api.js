@@ -92,13 +92,13 @@ module.exports = function(router) {
     // General
     // Check in to an event
     router.post('/checkInToEvent', permissions.isVerified, function(req, res){
-        EventController.checkInUser(req.userExecute, req.body.userID, req.body.eventID, logger.defaultResponse(req, res));
+        EventController.checkInUser(req.userExecute, req.body.userID, req.body.eventID, req.body.checkInCode, logger.defaultResponse(req, res));
     })
 
     // General
     // Get event dashboard messages
     router.get('/getEventMessages', permissions.isVerified, function(req, res){
-        EventController.getMessages(req.userExecute, req.body.eventID, logger.defaultResponse(req, res));
+        EventController.getMessages(req.userExecute, req.query.eventID, logger.defaultResponse(req, res));
     })
 
     // Admin

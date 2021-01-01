@@ -12,7 +12,8 @@ EventController.createEvent = function(adminUser, name, description, dateTime, c
     Event.create({
         name: name,
         description: description,
-        'dates.event': dateTime
+        'dates.event': dateTime,
+        'options.checkInCode': Math.random().toString(16).substr(2, 8) // generate random check in code
     }, function(err, event){
         if(err){
             logger.defaultLogger.error(`Error while creating event ${name}. `, err);
@@ -146,7 +147,7 @@ EventController.getFilteredEvents = function(userExecute, callback) {
         return callback({error: 'Invalid arguments.', clean: true, code: 400})
     }
 
-    Event.find({}).select('+registeredUsers').exec(function(err,events){
+    Event.find({}).select('+registeredUsers +checkInData').exec(function(err,events){
         if(err) {
             logger.defaultLogger.error(`Error querying event while attempting to get filtered events. `, err);
             return callback(err);
@@ -187,14 +188,18 @@ EventController.getFilteredEvents = function(userExecute, callback) {
             }
 
             eventsR.push(eventInfo.toObject());
-            delete eventsR[eventsR.length-1].registeredUsers;
+            logger.defaultLogger.debug("Hello");
+            // delete eventsR[eventsR.length-1].registeredUsers;
+
         }
+
+        logger.defaultLogger.silly(eventsR);
 
         return callback(null, eventsR);
     })
 }
 
-EventController.checkInUser = function(userExecute, userID, eventID, callback){
+EventController.checkInUser = function(userExecute, userID, eventID, checkInCode, callback){
     // if normal user:
     // - do not allow check in to a non-public event that user is not registered for
     // - do not allow check in to an event that requires registration before check in
@@ -217,7 +222,7 @@ EventController.checkInUser = function(userExecute, userID, eventID, callback){
             }
 
         }
-    }).select('+registeredUsers +checkInData').exec(function(err, event){
+    }).select('+registeredUsers +checkInData +options.checkInCode').exec(function(err, event){
         if(err){
             logger.defaultLogger.error(`Error querying event while attempting to check in user to event. `, err);
             return callback(err);
@@ -245,6 +250,10 @@ EventController.checkInUser = function(userExecute, userID, eventID, callback){
 
         if(event.dates.checkInClose !== -1 && event.dates.checkInClose < Date.now()){
             return callback({error: "Check in for this event has ended.", clean: true, code: 400});
+        }
+
+        if(event.options.checkInCodeRequired && checkInCode !== event.options.checkInCode &&!userExecute.permissions.admin){
+            return callback({error: "Invalid check in code.", clean: true, code: 400});
         }
 
         // update checked in as well as registration, if user did not register yet
@@ -313,7 +322,7 @@ EventController.registerUser = function(userExecute, userID, eventID, callback) 
             }
 
         }
-    }).exec(function(err, event){
+    }).select('+registeredUsers').exec(function(err, event){
         if(err){
             logger.defaultLogger.error(`Error querying event while attempting to register user for event. `, err);
             return callback(err);
@@ -329,11 +338,15 @@ EventController.registerUser = function(userExecute, userID, eventID, callback) 
 
         // check if registration has started
         if(event.dates.registrationOpen > Date.now()){
-            return callback({error: "Check in for this event has not yet started.", clean: true, code: 400});
+            return callback({error: "Registration for this event has not yet started.", clean: true, code: 400});
         }
 
         if(event.dates.registrationClose !== -1 && event.dates.registrationClose < Date.now()){
-            return callback({error: "Check in for this event has ended.", clean: true, code: 400});
+            return callback({error: "Registration for this event has ended.", clean: true, code: 400});
+        }
+
+        if(event.options.maxRegistrations !== -1 && event.registeredUsers.length >= event.options.maxRegistrations){
+            return callback({error: "This event is full.", clean: true, code: 400});
         }
 
         Event.updateOne({_id: eventID}, {
@@ -508,9 +521,9 @@ EventController.getByID = function(userExecute, id, callback){
     if(!userExecute || !id){
         return callback({error: 'Invalid arguments.', clean: true, code: 400})
     }
-    let selectProjection = '';
+    let selectProjection = '+registeredUsers +checkInData';
     if(userExecute.permissions.admin){
-        selectProjection = '+registeredUsers +checkInData +messages.registered +messages.checkedIn';
+        selectProjection += ' +messages.registered +messages.checkedIn +options.checkInCode';
     }
 
     Event.findOne({
