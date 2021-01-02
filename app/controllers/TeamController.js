@@ -581,19 +581,19 @@ TeamController.addPoints = function(adminUser, code, amount, notes, callback) {
     }
     Team.findOne({code: code}).select("memberIDs").exec(function(err, team){
         if(err){
-            logger.defaultLogger.error(`Error fetching team while attempting to add points to team. `, err);
+            logger.defaultLogger.error(`Error fetching team while attempting to add points to team ${code}. `, err);
             return callback(err);
         }
 
-        logger.logAction(adminUser._id, -1, "Added points to team.", `${amount} points. Notes: ${notes}`);
+        logger.logAction(adminUser._id, -1, "Added points to team.", `Team: ${code} Points: ${amount} Notes: ${notes}`);
 
         for(let member of team.memberIDs){
             User.addPoints(adminUser, member, amount, notes, function(err, msg) {
                 if(err){
-                    logger.defaultLogger.error(`Error adding points to user ${member} while attempting to add points to team. `, err);
+                    logger.defaultLogger.error(`Error adding points to user ${member} while attempting to add points to team ${code}. `, err);
                     return;
                 }
-                logger.logAction(adminUser._id, member, "Added points to user.", `${amount} points. Notes: ${notes}`);
+                logger.logAction(adminUser._id, member, "Added points to user.", `Team: ${code} Points: ${amount} Notes: ${notes}`);
             });
         }
         return callback(null, "Team points awarding queued.");

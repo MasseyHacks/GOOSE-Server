@@ -500,12 +500,55 @@ EventController.getCheckedIn = function(adminUser, id, callback){
 
 }
 
-EventController.awardPointsToRegistered = function(adminUser, eventID, callback){
+EventController.awardPointsToRegistered = function(adminUser, id, amount, notes, callback){
+    if(!adminUser || !id || amount === null || isNaN(amount) || (amount * 10)%10 !== 0 || !notes){
+        return callback({error: "Invalid arguments.", clean: true, code: 400})
+    }
+    Event.findOne({_id: id}).select("registeredUsers").exec(function(err, event){
+        if(err){
+            logger.defaultLogger.error(`Error fetching event while attempting to add points to registered users of event ${id}. `, err);
+            return callback(err);
+        }
 
+        logger.logAction(adminUser._id, -1, "Awarded points to registered members.", `Event: ${id} Points: ${amount} Notes: ${notes}`);
+
+        for(let member of event.registeredUsers){
+            User.addPoints(adminUser, member, amount, notes, function(err, msg) {
+                if(err){
+                    logger.defaultLogger.error(`Error adding points to user ${member} while attempting to add points to registered users of event ${id}. `, err);
+                    return;
+                }
+                logger.logAction(adminUser._id, member, "Added points to user.", `Event (registered): ${id} Points: ${amount} Notes: ${notes}`);
+            });
+        }
+        return callback(null, "Event registered users awarding queued.");
+    })
 }
 
-EventController.awardPointsToCheckedIn = function(adminUser, eventID, callback){
+EventController.awardPointsToCheckedIn = function(adminUser, id, amount, notes, callback){
+    if(!adminUser || !id || amount === null || isNaN(amount) || (amount * 10)%10 !== 0 || !notes){
+        return callback({error: "Invalid arguments.", clean: true, code: 400})
+    }
+    Event.findOne({_id: id}).select("checkInData").exec(function(err, event){
+        if(err){
+            logger.defaultLogger.error(`Error fetching event while attempting to add points to checked in users of event ${id}. `, err);
+            return callback(err);
+        }
 
+        logger.logAction(adminUser._id, -1, "Awarded points to checked in members.", `Event: ${id} Points: ${amount} Notes: ${notes}`);
+
+        for(let checkData of event.checkInData){
+            const member = checkData.checkedInUser;
+            User.addPoints(adminUser, member, amount, notes, function(err, msg) {
+                if(err){
+                    logger.defaultLogger.error(`Error adding points to user ${member} while attempting to add points to checked in users of event ${id}. `, err);
+                    return;
+                }
+                logger.logAction(adminUser._id, member, "Added points to user.", `Event (checked in): ${id} Points: ${amount} Notes: ${notes}`);
+            });
+        }
+        return callback(null, "Event checked in users awarding queued.");
+    })
 }
 
 EventController.getAllEvents = function(callback) {

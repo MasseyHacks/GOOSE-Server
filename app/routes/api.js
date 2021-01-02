@@ -114,6 +114,18 @@ module.exports = function(router) {
     })
 
     // Admin
+    // Award event registered users points
+    router.post('/awardEventRegisteredPoints', permissions.isAdmin, function(req, res){
+        EventController.awardPointsToRegistered(req.userExecute, req.body.id, req.body.amount, req.body.notes, logger.defaultResponse(req, res));
+    })
+
+    // Admin
+    // Award event checked in users points
+    router.post('/awardEventCheckedInPoints', permissions.isAdmin, function(req, res){
+        EventController.awardPointsToCheckedIn(req.userExecute, req.body.id, req.body.amount, req.body.notes, logger.defaultResponse(req, res));
+    })
+
+    // Admin
     // Deactivate all teams
     router.post('/deactivateAllTeams', permissions.isOwner, function(req, res){
         bulkModifyTeams.deactivateAll(req.userExecute, logger.defaultResponse(req, res));
