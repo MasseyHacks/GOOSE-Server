@@ -1,6 +1,7 @@
 const Event = require('../models/Event');
 const User = require('../models/User');
 const logger = require('../services/logger');
+const mongoose = require("mongoose");
 
 let EventController = {};
 
@@ -320,6 +321,9 @@ EventController.registerUser = function(userExecute, userID, eventID, callback) 
         }
     }).select('+registeredUsers').exec(function(err, event){
         if(err){
+            if(err instanceof mongoose.Error.CastError){
+                return callback({error: "The given event ID is invalid!", code: 400, clean: true})
+            }
             logger.defaultLogger.error(`Error querying event while attempting to register user for event. `, err);
             return callback(err);
         }
@@ -369,9 +373,8 @@ EventController.registerUser = function(userExecute, userID, eventID, callback) 
                 logger.logAction(userExecute._id, userID, "Registered user for event.",`Event ID: ${eventID}`)
                 return callback(null, {message: "Registered for event successfully."});
             })
-
         })
-    });
+    })
 }
 
 EventController.unregisterUser = function(userExecute, userID, eventID, callback){
