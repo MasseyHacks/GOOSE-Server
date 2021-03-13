@@ -60,6 +60,18 @@ module.exports = function(router) {
     })
 
     // Admin
+    // Get event registered users
+    router.get('/getEventRegisteredUsers', permissions.isAdmin, function(req, res){
+        EventController.getRegistered(req.userExecute, req.query.id, req.query.pageSize, req.query.page, logger.defaultResponse(req, res));
+    })
+
+    // Admin
+    // Get event registered users
+    router.get('/getEventCheckedInUsers', permissions.isAdmin, function(req, res){
+        EventController.getCheckedIn(req.userExecute, req.query.id, req.query.pageSize, req.query.page, logger.defaultResponse(req, res));
+    })
+
+    // Admin
     // Get all events
     router.get('/getAllEvents', permissions.isAdmin, function(req, res){
         EventController.getAllEvents(logger.defaultResponse(req, res));

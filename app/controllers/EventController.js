@@ -495,12 +495,86 @@ EventController.getMessages = function(userExecute, id, callback){
     })
 }
 
-EventController.getRegistered = function(adminUser, id, callback){
+EventController.getRegistered = function(adminUser, id, pageSize=40, page=1, callback){
+    if(!adminUser || !id || isNaN(pageSize) || isNaN(page)){
+        return callback({error: 'Invalid arguments.', clean: true, code: 400})
+    }
+
+    pageSize = parseInt(pageSize);
+    page = parseInt(page);
+
+    Event.findOne({_id: id}).select("registeredUsers").exec(function(err, event){
+        if(err){
+            logger.defaultLogger.error(`Error fetching event while attempting to get event registered users of event ${id}. `, err);
+            return callback(err);
+        }
+
+        if(!event){
+            return callback({error: "The given event does not exist.", code: 404, clean: true});
+        }
+
+        if(!event.registeredUsers){
+            return callback(null, {pages: 1, page: 1, data: []});
+        }
+
+        logger.defaultLogger.silly(event.registeredUsers);
+
+        User.find({
+            _id: {
+                $in: event.registeredUsers
+            }
+        }).sort({firstName: 1, lastName: 1}).skip((page-1)*pageSize).limit(pageSize).exec(function(err, users){
+            if(err){
+                logger.defaultLogger.error(`Error fetching registered user information for event ${id}. `, err);
+                return callback(err);
+            }
+            return callback(null, {totalPages: Math.ceil(event.registeredUsers.length/pageSize), page: page, count: event.registeredUsers.length, users:users});
+        });
+
+    })
 
 }
 
-EventController.getCheckedIn = function(adminUser, id, callback){
+EventController.getCheckedIn = function(adminUser, id, pageSize=40,page=1, callback){
+    if(!adminUser || !id || isNaN(pageSize) || isNaN(page)){
+        return callback({error: 'Invalid arguments.', clean: true, code: 400})
+    }
 
+    pageSize = parseInt(pageSize);
+    page = parseInt(page);
+
+    Event.findOne({_id: id}).select("checkInData").exec(function(err, event){
+        if(err){
+            logger.defaultLogger.error(`Error fetching event while attempting to get event checked in users of event ${id}. `, err);
+            return callback(err);
+        }
+
+        if(!event){
+            return callback({error: "The given event does not exist.", code: 404, clean: true});
+        }
+
+        if(!event.checkInData){
+            return callback(null, {pages: 1, page: 1, data: []});
+        }
+
+        let checkedInUserIDs = event.checkInData.map(function(checkInData){return checkInData.checkedInUser});
+
+        logger.defaultLogger.silly(event.checkInData);
+        logger.defaultLogger.silly(checkedInUserIDs);
+
+        User.find({
+            _id: {
+                $in: checkedInUserIDs
+            }
+        }).sort({firstName: 1, lastName: 1}).skip((page-1)*pageSize).limit(pageSize).exec(function(err, users){
+            if(err){
+                logger.defaultLogger.error(`Error fetching checked in user information for event ${id}. `, err);
+                return callback(err);
+            }
+            return callback(null, {totalPages: Math.ceil(checkedInUserIDs.length/pageSize), page: page, count:checkedInUserIDs.length, users:users});
+        });
+
+    })
 }
 
 EventController.awardPointsToRegistered = function(adminUser, id, amount, notes, callback){
