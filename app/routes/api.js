@@ -14,6 +14,8 @@ const UserController     = require('../controllers/UserController');
 const TeamController     = require('../controllers/TeamController');
 const SettingsController = require('../controllers/SettingsController');
 const EventController    = require('../controllers/EventController');
+const ShopItemController = require('../controllers/ShopItemController');
+const OrderController    = require('../controllers/OrderController');
 const globalUsersManager  = require('../services/globalUsersManager');
 
 const permissions        = require('../services/permissions');
@@ -28,6 +30,49 @@ JWT_SECRET             = process.env.JWT_SECRET;
 
 module.exports = function(router) {
     router.use(express.json());
+
+    // Admin
+    // Add item
+
+    router.post('/addShopItem', permissions.isAdmin, function(req, res){
+        ShopItemController.createItem(req.userExecute, req.body.name, req.body.description, req.body.price, req.body.maxOrders, logger.defaultResponse(req, res));
+    })
+
+    // Admin
+    // Modify item
+    router.post('/modifyShopItem', permissions.isAdmin, function(req, res){
+        ShopItemController.updateItem(req.userExecute, req.body.itemID, req.body.newDetails, logger.defaultResponse(req, res));
+    })
+
+    // Admin
+    // Fulfill order
+    router.post('/fulfillOrder', permissions.isAdmin, function(req, res){
+        OrderController.fulfillOrder(req.userExecute, req.body.orderID, logger.defaultResponse(req, res));
+    })
+
+    // Admin
+    // Cancel order
+    router.post('/cancelOrder', permissions.isAdmin, function(req, res){
+        OrderController.cancelOrder(req.userExecute, req.body.orderID, logger.defaultResponse(req, res));
+    })
+
+    // General
+    // Get all items
+    router.get('/getShopItems', permissions.isVerified, function(req, res){
+        ShopItemController.getItems(req.userExecute, logger.defaultResponse(req, res));
+    })
+
+    // General
+    // Create order
+    router.post('/createOrder', permissions.isVerified, function(req, res){
+        OrderController.createOrder(req.userExecute, req.body.itemID, logger.defaultResponse(req, res));
+    })
+
+    // General
+    // Get orders
+    router.get('/getOrders', permissions.isVerified, function(req, res){
+        UserController.getOrders(req.userExecute, req.body.userID || req.userExecute._id, logger.defaultResponse(req, res));
+    })
 
     // Admin
     // Create event

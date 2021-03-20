@@ -1,4 +1,3 @@
-const mongoose = require('mongoose')
 const checkInEntryFields = require('./CheckInEntryFields')
 let dates = {
     registrationOpen: {

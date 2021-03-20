@@ -1,8 +1,8 @@
 const User = require('../models/User');
-const Team = require('../models/Team');
 const Settings = require('../models/Settings');
 const SettingsController = require('./SettingsController');
 const TeamController = require('./TeamController');
+const Order = require("../models/ShopOrder");
 
 const jwt = require('jsonwebtoken');
 const axios = require('axios');
@@ -14,8 +14,6 @@ const moment = require('moment');
 const logger = require('../services/logger');
 const mailer = require('../services/email');
 const flush = require('../services/flush');
-const stats = require('../services/stats');
-const autoRemove = require('../services/autoRemove');
 
 const UserFields = require('../models/data/UserFields');
 const FilterFields = require('../models/data/FilterFields');
@@ -41,6 +39,28 @@ UserController.addPoints = function (adminUser, id, amount, notes, callback) {
         return callback(err, "Added points to user.");
     });
 };
+
+UserController.getOrders = function(userExecute, userID, callback){
+    if(!userExecute || !userID){
+        return callback({error: 'Invalid arguments.', clean: true, code: 400});
+    }
+
+    if(userExecute._id.toString() !== userID && !userExecute.permissions.admin){
+        return callback({error: "You cannot fetch orders for that user.", code: 401, clean: true});
+    }
+
+    Order.find({
+        purchaseUser: userID
+    }, function(err, orders){
+        if(err){
+            return callback(`Error fetching order for user ${userID}. `, err);
+        }
+
+        return callback(null, {
+            orders: orders
+        })
+    })
+}
 
 UserController.rejectNoState = function (adminUser, callback) {
     if(!adminUser){
