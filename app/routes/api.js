@@ -34,13 +34,13 @@ module.exports = function(router) {
     // Admin
     // Add item
 
-    router.post('/addShopItem', permissions.isAdmin, function(req, res){
-        ShopItemController.createItem(req.userExecute, req.body.name, req.body.description, req.body.price, req.body.maxOrders, logger.defaultResponse(req, res));
+    router.post('/createShopItem', permissions.isAdmin, function(req, res){
+        ShopItemController.createItem(req.userExecute, req.body.name, req.body.description, req.body.price, req.body.maxOrders, req.body.ordersOpenTime, req.body.ordersCloseTime, logger.defaultResponse(req, res));
     })
 
     // Admin
     // Modify item
-    router.post('/modifyShopItem', permissions.isAdmin, function(req, res){
+    router.post('/updateShopItem', permissions.isAdmin, function(req, res){
         ShopItemController.updateItem(req.userExecute, req.body.itemID, req.body.newDetails, logger.defaultResponse(req, res));
     })
 
@@ -71,7 +71,7 @@ module.exports = function(router) {
     // General
     // Get orders
     router.get('/getOrders', permissions.isVerified, function(req, res){
-        UserController.getOrders(req.userExecute, req.body.userID || req.userExecute._id, logger.defaultResponse(req, res));
+        UserController.getOrders(req.userExecute, req.query.userID || req.userExecute._id, logger.defaultResponse(req, res));
     })
 
     // Admin

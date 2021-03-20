@@ -42,7 +42,9 @@ OrderController.createOrder = function(userExecute, itemID, callback){
             if(shopItem.ordersOpen){
                 ShopOrder.create({
                     itemID: itemID,
+                    itemName: shopItem.name,
                     purchaseUser: userExecute._id,
+                    purchasePrice: shopItem.price,
                     purchaseTime: Date.now()
                 }, function(err, shopOrder) {
                     if(err || !shopOrder){
@@ -62,7 +64,7 @@ OrderController.createOrder = function(userExecute, itemID, callback){
                             return callback(err);
                         }
 
-                        User.addPoints(userExecute, userExecute._id, -shopItem.price, `Order ID: ${shopOrder._id}.`, function(err){
+                        User.addPoints(userExecute, userExecute._id, -shopItem.price, `Shop order. Order ID: ${shopOrder._id}`, function(err){
                             if(err){
                                 logger.defaultLogger.error(`Error charging user ${userExecute._id} for order ${shopOrder._id} to buy item ${itemID}`);
                                 return callback(err);

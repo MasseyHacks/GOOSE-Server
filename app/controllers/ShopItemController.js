@@ -43,7 +43,7 @@ ShopItemController.updateItem = function(adminUser, itemID, newDetails, callback
         }
 
         logger.logAction(adminUser._id, -1, "Updated shop item.", `ID: ${shopItem._id}\nNew name: ${shopItem.name}\nNew description: ${shopItem.description}\nNew price: ${shopItem.price}\nNew max Orders: ${shopItem.maxOrders}`);
-        return callback(shopItem);
+        return callback(null, shopItem);
     })
 }
 

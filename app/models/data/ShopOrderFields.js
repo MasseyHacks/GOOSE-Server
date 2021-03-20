@@ -3,8 +3,16 @@ let schema = {
         type: String,
         required: true
     },
+    itemName: { // Just for easy display, not tied to anything else
+        type: String,
+        required: true
+    },
     purchaseUser: {
         type: String,
+        required: true
+    },
+    purchasePrice: {
+        type: Number,
         required: true
     },
     status: {

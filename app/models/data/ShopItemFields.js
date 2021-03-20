@@ -37,3 +37,5 @@ let schema = {
         default: false
     }
 }
+
+module.exports = schema;

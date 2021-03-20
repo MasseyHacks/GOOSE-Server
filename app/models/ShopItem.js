@@ -34,4 +34,4 @@ schema.set('toObject', {
 });
 
 
-module.exports = schema;
+module.exports = mongoose.model('ShopItem', schema);

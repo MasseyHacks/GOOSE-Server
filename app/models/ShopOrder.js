@@ -4,4 +4,4 @@ const fields = require('./data/ShopOrderFields');
 
 let schema = new mongoose.Schema(fields);
 
-module.exports = schema;
+module.exports = mongoose.model('ShopOrder', schema);
