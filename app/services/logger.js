@@ -148,7 +148,7 @@ let Logger = {
                                     })
                                 }
                             }
-                        ).then(() => logger.defaultLogger.debug('Message sent to slack'));
+                        ).then(() => Logger.defaultLogger.debug('Message sent to slack'));
                     }
                 }
 
