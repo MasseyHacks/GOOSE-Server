@@ -2,7 +2,6 @@ require('dotenv').config();
 
 const Settings = require('./Settings');
 
-const logger = require('../services/logger');
 const mailer = require('../services/email');
 
 const mongoose = require('mongoose');
@@ -201,7 +200,7 @@ schema.statics.admitUser = function (adminUser, userID, callback) {
 };
 
 schema.statics.rejectUser = function (adminUser, userID, callback) {
-
+    const logger = require('../services/logger');
     if (!adminUser || !userID) {
         return callback({error: 'Invalid arguments.', code: 400, clean: true});
     }
