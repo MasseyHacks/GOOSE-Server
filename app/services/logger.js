@@ -125,7 +125,7 @@ let Logger = {
                         '\nError:\n' +
                         JSON.stringify(err, null, 2) +
                         '``` \n';
-                    this.defaultLogger.error(data.replace('\n', ' '));
+                    Logger.defaultLogger.error(data.replace('\n', ' '));
                     /*if (process.env.SERVER_RAVEN_KEY && (!err.code || err.code >= 500)) {
                         Raven.captureMessage(data, {
                             level: 'error'
