@@ -74,7 +74,7 @@
   "rejectionemails":{
     "queueName":"rejectionEmails",
     "templateLocation":"./app/templates/email-reject/html.hbs",
-    "emailTitle":"MasseyHacks Admission Status",
+    "emailTitle":"7WC & MasseyHacks Admission Status",
     "canQueue":true
   },
   "verifyemails":{
@@ -86,7 +86,7 @@
   "organizeremails":{
     "queueName":"organizerEmails",
     "templateLocation":"./app/templates/email-organizer/html.hbs",
-    "emailTitle":"Welcome to MasseyHacks V login",
+    "emailTitle":"Welcome to GOOSE",
     "canQueue":false
   },
   "magiclinkemails":{
