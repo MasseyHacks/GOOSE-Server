@@ -31,7 +31,7 @@ module.exports = {
 
     sendTemplateEmail: function(recipient,templateName,dataPack,templateHTML=null){//templated email
         const logger     = require('../services/logger');
-        console.log('logger' + logger.test());
+        // console.log('logger' + logger.test());
         templateName = templateName.toLowerCase();
         logger.defaultLogger.debug('Sending template email! to:' +recipient+ ' template '+templateName+' dp '+dataPack);
         if(validTemplates[templateName]['queueName']){
