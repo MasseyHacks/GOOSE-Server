@@ -71,7 +71,10 @@ function createWinstonLogger() {
 
     // Only log to StackDriver in production
     if (process.env.NODE_ENV === 'production'){
-        const loggingWinston = new LoggingWinston();
+        const loggingWinston = new LoggingWinston({
+            projectId: process.env.GCP_LOGGING_PROJECTID,
+            keyFilename: process.env.GCP_LOGGING_KEYFILEPATH
+        });
         logger.add(loggingWinston)
     }
     return logger;
