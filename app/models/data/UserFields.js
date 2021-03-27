@@ -190,37 +190,80 @@ var hackerApplication = {
     },
 
 
-    dietaryRestrictions: {
-        type: [String],
-        questionType: 'multicheck',
-        question: '<b>Please indicate any dietary restrictions.</b>',
-        note: 'If your restrictions are not included here, please let us know in the free comment section at the bottom.',
-        enum: {
-            values: 'Vegetarian|Vegan|Halal|Kosher|Nut Allergy|Gluten Free'
-        },
-        mandatory: false
-    },
-
-    departure: {
+    // dietaryRestrictions: {
+    //     type: [String],
+    //     questionType: 'multicheck',
+    //     question: '<b>Please indicate any dietary restrictions.</b>',
+    //     note: 'If your restrictions are not included here, please let us know in the free comment section at the bottom.',
+    //     enum: {
+    //         values: 'Vegetarian|Vegan|Halal|Kosher|Nut Allergy|Gluten Free'
+    //     },
+    //     mandatory: false
+    // },
+    //
+    // departure: {
+    //     type: String,
+    //     maxlength: 100,
+    //     questionType: 'shortAnswer',
+    //     question: '<b>What city are you travelling from?</b>',
+    //     mandatory: true,
+    //     precaption: 'TRAVEL'
+    // },
+    //
+    // bus: {
+    //     type: Boolean,
+    //     questionType: 'boolean',
+    //     question: '<b>Will you be travelling on our Toronto/Waterloo bus? (If funding permits)</b>',
+    //     mandatory: true
+    // },
+    //
+    // reimbursement: {
+    //     type: Boolean,
+    //     questionType: 'boolean',
+    //     question: '<b>Do you need travel reimbursement? (If funding permits)</b>',
+    //     mandatory: true
+    // },
+    address1: {
         type: String,
         maxlength: 100,
         questionType: 'shortAnswer',
-        question: '<b>What city are you travelling from?</b>',
+        question: "<b>Address Line 1</b>",
         mandatory: true,
-        precaption: 'TRAVEL'
+        precaption: 'SHIPPING INFO'
     },
-
-    bus: {
-        type: Boolean,
-        questionType: 'boolean',
-        question: '<b>Will you be travelling on our Toronto/Waterloo bus? (If funding permits)</b>',
+    address2: {
+        type: String,
+        maxlength: 100,
+        questionType: 'shortAnswer',
+        question: "<b>Address Line 2</b>",
+        mandatory: false
+    },
+    city: {
+        type: String,
+        maxlength: 100,
+        questionType: 'shortAnswer',
+        question: "<b>City</b>",
         mandatory: true
     },
-
-    reimbursement: {
-        type: Boolean,
-        questionType: 'boolean',
-        question: '<b>Do you need travel reimbursement? (If funding permits)</b>',
+    provincestate: {
+        type: String,
+        maxlength: 100,
+        questionType: 'shortAnswer',
+        question: "<b>Province/State</b>",
+        mandatory: true
+    },
+    country: {
+        type: String,
+        maxlength: 100,
+        questionType: 'shortAnswer',
+        question: "<b>Country</b>",
+        mandatory: true
+    },
+    postalcode: {
+        type: String,
+        maxlength: 100,
+        questionType: 'shortAnswer',
+        question: "<b>Postal/Zip Code</b>",
         mandatory: true
     },
 
@@ -269,7 +312,7 @@ var hackerApplication = {
         type: String,
         maxlength: 1500,
         questionType: 'fullResponse',
-        question: '<b>Why do you want to attend MasseyHacks? (Two sentence minimum)</b>',
+        question: '<b>Why do you want to attend the 7WC and MasseyHacks? (Two sentence minimum)</b>',
         mandatory: true
     },
 
@@ -287,7 +330,7 @@ var hackerApplication = {
         questionType: 'dropdown',
         question: '<b>How did you find us?</b>',
         enum: {
-            values: ' |MLH|Social Media|Word of mouth|Other'
+            values: ' |Word of mouth|Social Media|News Media|School Club|Other'
         },
         mandatory: true,
 
@@ -296,16 +339,16 @@ var hackerApplication = {
     codeOfConduct: {
         type: Boolean,
         questionType: 'contract',
-        question: '<b>I have read and agree to the <a href="https://static.mlh.io/docs/mlh-code-of-conduct.pdf" target="_blank">MLH Code of Conduct</a>.</b>',
-        reviewerText: '<b>I have read and agree to the MLH Code of Conduct.</b>',
+        question: '<b>I have read and agree to the <a href="https://7wc.vmcs.club/code-of-conduct.pdf" target="_blank">7 Week Challenge &amp; MasseyHacks Code of Conduct</a>.</b>',
+        reviewerText: '<b>I have read and agree to the Code of Conduct.</b>',
         mandatory: true,
         warning: 'You must agree to the MLH Code of Conduct.'
     },
 
-    termsAndConditions: {
+    datasharing: {
         type: Boolean,
         questionType: 'contract',
-        question: '<b>I authorize you to share my application/registration information for event administration, ranking, MLH administration, pre- and post-event informational e-mails, and occasional messages about hackathons in-line with the <a href="https://mlh.io/privacy" target="_blank">MLH Privacy Policy</a>. I agree to the terms of both the <a href="https://github.com/MLH/mlh-policies/tree/master/prize-terms-and-conditions" target="_blank">MLH Contest Terms and Conditions</a> and the <a href="https://mlh.io/privacy" target="_blank">MLH Privacy Policy</a>.</b>',
+        question: '<b>I authorize the 7 Week Challenge, MasseyHacks, and its affiliates to share my information with trusted third parties such as sponsors and partners in order to run the event and fulfill any contractual obligations.</b>',
         mandatory: true,
         reviewerText: '<b>I have read and agree to the MLH Contest Terms and data-sharing policy.</b>',
         warning: 'You must agree to the MLH Contest Terms and Conditions and data-sharing policy.'
