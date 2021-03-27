@@ -8,8 +8,6 @@ const mongoose        = require('mongoose');
 const port            = process.env.PORT || 3005;
 const database        = process.env.DATABASE || 'mongodb://localhost:27017/goose';
 const logger          = require('./app/services/logger');
-const lw              = require('@google-cloud/logging-winston');
-const winston         = require('winston');
 
 // Start configuration
 const organizers      = require('./config/organizers');

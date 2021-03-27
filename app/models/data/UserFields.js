@@ -339,7 +339,7 @@ var hackerApplication = {
     codeOfConduct: {
         type: Boolean,
         questionType: 'contract',
-        question: '<b>I have read and agree to the <a href="https://7wc.vmcs.club/code-of-conduct.pdf" target="_blank">7 Week Challenge &amp; MasseyHacks Code of Conduct</a>.</b>',
+        question: '<b>I have read and agree to the <a href="https://7wc.vmcs.club/assets/code-of-conduct.pdf" target="_blank">7 Week Challenge &amp; MasseyHacks Code of Conduct</a>.</b>',
         reviewerText: '<b>I have read and agree to the Code of Conduct.</b>',
         mandatory: true,
         warning: 'You must agree to the MLH Code of Conduct.'
