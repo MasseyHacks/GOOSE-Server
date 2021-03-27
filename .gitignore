@@ -4,3 +4,4 @@ error.log
 combined.log
 googlecloud.json
 exceptions.log
+config/data/organizers.json
