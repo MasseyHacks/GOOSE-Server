@@ -1607,4 +1607,52 @@ UserController.hideStatus = function (adminUser, userID, callback) {
     })
 };
 
+UserController.associateDiscordID = function (adminUser, userID, discordID, callback) {
+    if(!adminUser || !userID || !discordID){
+        return callback({error: 'Invalid arguments.', clean: true, code: 400});
+    }
+
+    User.findOneAndUpdate({
+        _id: userID
+    }, {
+        $set: {
+            'discordID': discordID
+        }
+    }, {
+        new: true
+    }, function (err, user) {
+        if (err || !user) {
+            return callback(err ? err : {error: 'Unable to perform action.', code: 400})
+        }
+
+        logger.logAction(adminUser._id, user._id, 'Associated user with Discord ID ' + discordID, 'EXECUTOR IP: ' + adminUser.ip);
+
+        return callback(err, user);
+    })
+}
+
+UserController.dissociateDiscord = function(adminUser, userID, callback) {
+    if(!adminUser || !userID) {
+        return callback({error: 'Invalid arguments.', clean: true, code: 400});
+    }
+
+    User.findOneAndUpdate({
+        _id: userID
+    }, {
+        $unset: {
+            discordID: ''
+        }
+    }, {
+        new: true
+    }, function (err, user) {
+        if (err || !user) {
+            return callback(err ? err : {error: 'Unable to perform action.', code: 400})
+        }
+
+        logger.logAction(adminUser._id, user._id, 'Dissociated user from their Discord account', 'EXECUTOR IP: ' + adminUser.ip);
+
+        return callback(err, user);
+    })
+}
+
 module.exports = UserController;

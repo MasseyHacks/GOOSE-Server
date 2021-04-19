@@ -32,6 +32,18 @@ module.exports = function(router) {
     router.use(express.json());
 
     // Admin
+    // Associate user with Discord ID
+    router.post('/associateDiscord', permissions.isAdmin, function(req, res){
+        UserController.associateDiscordID(req.userExecute, req.body.userID, req.body.discordID, logger.defaultResponse(req, res));
+    })
+
+    // Admin
+    // Dissociate user from Discord ID
+    router.post('/dissociateDiscord', permissions.isAdmin, function(req, res){
+        UserController.dissociateDiscord(req.userExecute, req.body.userID, logger.defaultResponse(req, res));
+    })
+
+    // Admin
     // Add item
 
     router.post('/createShopItem', permissions.isAdmin, function(req, res){

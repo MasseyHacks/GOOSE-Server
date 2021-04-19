@@ -614,7 +614,11 @@ var schema = {
             type: [pointsEntryFields]
         }
     },
-    events: events
+    events: events,
+
+    discordID: {
+        type: String
+    }
 };
 
 module.exports = schema;
