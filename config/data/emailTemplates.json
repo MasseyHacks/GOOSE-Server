@@ -50,7 +50,7 @@
   "laggerwaiveremails":{
   "queueName":"laggerWaiverEmails",
   "templateLocation":"./app/templates/email-lagger-waiver/html.hbs",
-  "emailTitle":"You haven't submitted your waiver!",
+  "emailTitle":"You haven't joined the Discord!",
   "canQueue":true
   },
   "passwordchangedemails":{
