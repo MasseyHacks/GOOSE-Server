@@ -1268,6 +1268,7 @@ UserController.flushEmailQueue = function (adminUser, userID, callback) {
 };
 
 UserController.acceptInvitation = function (executeUser, confirmation, callback) {
+    // NOTE: executeUser is only guaranteed to have _id!
     if(!executeUser || !confirmation){
         return callback({error: 'Invalid arguments.', clean: true, code: 400});
     }
@@ -1290,13 +1291,13 @@ UserController.acceptInvitation = function (executeUser, confirmation, callback)
             }, function(err, user) {
 
                 if (user && !err) {
-                    UserController.inviteToSlack(user._id, user.email,function(err, data){
-                        if(err){
-                            logger.defaultLogger.error("Error attempting to invite user to Slack. ", err);
-                        }
-                        logger.defaultLogger.debug(data);
-
-                    });
+                    // UserController.inviteToSlack(user._id, user.email,function(err, data){
+                    //     if(err){
+                    //         logger.defaultLogger.error("Error attempting to invite user to Slack. ", err);
+                    //     }
+                    //     logger.defaultLogger.debug(data);
+                    //
+                    // });
 
                     mailer.sendTemplateEmail(user.email, 'confirmationemails', {
                         nickname: user.firstName,

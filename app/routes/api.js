@@ -32,6 +32,17 @@ module.exports = function(router) {
     router.use(express.json());
 
     // Admin
+    // Confirm for user
+    router.post('/adminAcceptInvitation', permissions.isAdmin, function(req, res) {
+        var confirmation = req.body.confirmation;
+        let userID = req.body.userID;
+
+        UserController.acceptInvitation({
+            _id: userID
+        }, confirmation, logger.defaultResponse(req, res));
+    });
+
+    // Admin
     // Associate user with Discord ID
     router.post('/associateDiscord', permissions.isAdmin, function(req, res){
         UserController.associateDiscordID(req.userExecute, req.body.userID, req.body.discordID, logger.defaultResponse(req, res));
