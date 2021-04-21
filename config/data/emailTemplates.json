@@ -38,7 +38,7 @@
   "laggeremails":{
     "queueName":"laggerEmails",
     "templateLocation":"./app/templates/email-lagger/html.hbs",
-    "emailTitle":"You haven't submitted your application!",
+    "emailTitle":"[Final Reminder] You haven't submitted your application!",
     "canQueue":true
   },
   "laggerconfirmemails":{
