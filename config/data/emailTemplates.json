@@ -38,7 +38,7 @@
   "laggeremails":{
     "queueName":"laggerEmails",
     "templateLocation":"./app/templates/email-lagger/html.hbs",
-    "emailTitle":"[Final Reminder] You haven't submitted your application!",
+    "emailTitle":"You haven't submitted your application!",
     "canQueue":true
   },
   "laggerconfirmemails":{
@@ -50,7 +50,7 @@
   "laggerwaiveremails":{
   "queueName":"laggerWaiverEmails",
   "templateLocation":"./app/templates/email-lagger-waiver/html.hbs",
-  "emailTitle":"You haven't joined the Discord!",
+  "emailTitle":"[Reminder] You haven't joined the 7WC Discord!",
   "canQueue":true
   },
   "passwordchangedemails":{
