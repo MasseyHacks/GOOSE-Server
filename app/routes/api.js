@@ -4,6 +4,7 @@ const express            = require('express');
 const mongodb            = require('mongodb');
 const fs                 = require('fs');
 const formidable         = require('formidable');
+const path               = require('path');
 
 const GridStore             = require('../models/GridStore');
 const User               = require('../models/User');
@@ -16,6 +17,7 @@ const SettingsController = require('../controllers/SettingsController');
 const EventController    = require('../controllers/EventController');
 const ShopItemController = require('../controllers/ShopItemController');
 const OrderController    = require('../controllers/OrderController');
+const SubmissionsController = require('../controllers/SubmissionsController');
 const globalUsersManager  = require('../services/globalUsersManager');
 
 const permissions        = require('../services/permissions');
@@ -24,12 +26,48 @@ const mailer             = require('../services/email');
 const stats              = require('../services/stats');
 const bulkModifyTeams    = require('../services/bulkModifyTeams');
 
+const multer = require('multer');
+
+
 require('dotenv').config();
 
 JWT_SECRET             = process.env.JWT_SECRET;
 
+var storage = multer.diskStorage({
+    destination: function (req, file, cb) {
+        let diskPath = path.join(__dirname, '..', '..', 'uploads', req.body.submissionBoxID, req.userExecute._id.toString());
+        fs.mkdirSync(diskPath, {
+            recursive: true
+        })
+        cb(null, diskPath)
+    },
+    filename: function (req, file, cb) {
+        cb(null, file.originalname + '-' + Date.now())
+    }
+})
+
+const upload = multer({storage: storage})
+
 module.exports = function(router) {
     router.use(express.json());
+
+    // Admin
+    // Get submission box submissions
+    router.get('/getSubmissionBoxSubmissions', permissions.isAdmin, function(req, res) {
+        SubmissionsController.getSubmissionBoxSubmissions(req.query.submissionBoxID, logger.defaultResponse(req, res));
+    })
+
+    // Admin
+    // Update submission box
+    router.post('/updateSubmissionBox', permissions.isAdmin, function(req, res){
+        SubmissionsController.createSubmissionBox(req.body.submissionBoxID, req.body.name, req.body.description, req.body.openDate, req.body.closeDate, logger.defaultResponse(req, res));
+    })
+
+    // Admin
+    // Create submission box
+    router.post('/createSubmissionBox', permissions.isAdmin, function(req, res){
+        SubmissionsController.createSubmissionBox(req.body.name, req.body.description, req.body.openDate, req.body.closeDate, logger.defaultResponse(req, res));
+    })
 
     // Admin
     // Confirm for user
@@ -77,6 +115,28 @@ module.exports = function(router) {
     // Cancel order
     router.post('/cancelOrder', permissions.isAdmin, function(req, res){
         OrderController.cancelOrder(req.userExecute, req.body.orderID, logger.defaultResponse(req, res));
+    })
+
+    // General
+    // Create a submission
+    router.post('/createSubmission', permissions.isVerified, upload.array('files', 10), function(req, res){
+        let filenames = []
+        if(req.files){
+            filenames = req.files.map((file) => file.originalname);
+        }
+        SubmissionsController.createSubmission(req.userExecute._id, req.body.submissionBoxID, filenames, req.body.description, logger.defaultResponse(req, res));
+    })
+
+    // General
+    // Get user submissions
+    router.get('/getSubmissions', permissions.isVerified, function(req, res){
+        SubmissionsController.getUserSubmissions(req.userExecute, req.query.userID, logger.defaultResponse(req, res));
+    })
+
+    // General
+    // Get submission boxes
+    router.get('/getSubmissionBoxes', permissions.isVerified, function(req, res){
+        SubmissionsController.getSubmissionBoxes(logger.defaultResponse(req, res));
     })
 
     // General
