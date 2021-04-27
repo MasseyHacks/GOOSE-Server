@@ -25,7 +25,7 @@ SubmissionsController.createSubmissionBox = function (name, description, openDat
     })
 }
 
-SubmissionsController.updateSubmissionBox = function(submissionBoxID, name, openDate, closeDate, callback){
+SubmissionsController.updateSubmissionBox = function(submissionBoxID, name, description, openDate, closeDate, callback){
     if(!submissionBoxID || !name || !description || isNaN(openDate) || isNaN(closeDate)){
         return callback({error: 'Invalid arguments.', code: 400, clean: true});
     }

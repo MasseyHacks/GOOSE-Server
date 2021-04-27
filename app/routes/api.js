@@ -60,7 +60,7 @@ module.exports = function(router) {
     // Admin
     // Update submission box
     router.post('/updateSubmissionBox', permissions.isAdmin, function(req, res){
-        SubmissionsController.createSubmissionBox(req.body.submissionBoxID, req.body.name, req.body.description, req.body.openDate, req.body.closeDate, logger.defaultResponse(req, res));
+        SubmissionsController.updateSubmissionBox(req.body.submissionBoxID, req.body.name, req.body.description, req.body.openDate, req.body.closeDate, logger.defaultResponse(req, res));
     })
 
     // Admin
