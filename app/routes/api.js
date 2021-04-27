@@ -58,6 +58,12 @@ module.exports = function(router) {
     })
 
     // Admin
+    // Delete submission box
+    router.post('/deleteSubmissionBox', permissions.isAdmin, function(req, res){
+        SubmissionsController.createSubmissionBox(req.body.submissionBoxID, logger.defaultResponse(req, res));
+    })
+
+    // Admin
     // Update submission box
     router.post('/updateSubmissionBox', permissions.isAdmin, function(req, res){
         SubmissionsController.updateSubmissionBox(req.body.submissionBoxID, req.body.name, req.body.description, req.body.openDate, req.body.closeDate, logger.defaultResponse(req, res));

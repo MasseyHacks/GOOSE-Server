@@ -47,6 +47,21 @@ SubmissionsController.updateSubmissionBox = function(submissionBoxID, name, desc
     })
 }
 
+SubmissionsController.removeSubmissionBox = function(submissionBoxID, callback){
+    if(!submissionBoxID){
+        return callback({error: 'Invalid arguments.', code: 400, clean: true});
+    }
+    SubmissionBox.deleteOne({
+        _id: submissionBoxID
+    }, function(err, res) {
+        if(err){
+            logger.defaultLogger.error(`Error deleting submission box ${submissionBoxID}. `, err);
+            return callback(err);
+        }
+        return callback(null);
+    })
+}
+
 SubmissionsController.createSubmission = function (userID, submissionBoxID, files, description, callback){
     if(!userID || !submissionBoxID || !description){
         return callback({error: 'Invalid arguments.', code: 400, clean: true});
