@@ -11,6 +11,10 @@ let schema = {
         type: String,
         required: true
     },
+    purchaseUserFullName: {
+        type: String,
+        required: true
+    },
     purchasePrice: {
         type: Number,
         required: true

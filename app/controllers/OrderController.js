@@ -44,6 +44,7 @@ OrderController.createOrder = function(userExecute, itemID, callback){
                     itemID: itemID,
                     itemName: shopItem.name,
                     purchaseUser: userExecute._id,
+                    purchaseUserFullName: user.fullName,
                     purchasePrice: shopItem.price,
                     purchaseTime: Date.now()
                 }, function(err, shopOrder) {
@@ -151,6 +152,38 @@ OrderController.cancelOrder = function(adminUser, orderID, callback){
         });
 
     });
+}
+
+OrderController.getOrder = function(userExecute, orderID, callback) {
+    let filter = {
+        id: orderID
+    };
+
+    // only allow admins to query order of other users
+    if(!userExecute.permissions.admin){
+        filter['purchaseUser'] = userExecute._id;
+    }
+    ShopOrder.findOne(filter, function(err, order) {
+        if(err || !order){
+            logger.defaultLogger.error(`Error getting order ID ${orderID}. `, err);
+            return callback(err);
+        }
+
+        return callback(null, order);
+    })
+}
+
+OrderController.getOrdersOfItem = function(itemID, callback) {
+    ShopOrder.find({
+        itemID: itemID
+    }, function(err, orders) {
+        if(err || !orders){
+            logger.defaultLogger.error(`Error getting orders for item ID ${itemID}. `, err);
+            return callback(err);
+        }
+
+        return callback(null, orders);
+    })
 }
 
 module.exports = OrderController;

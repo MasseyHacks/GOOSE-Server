@@ -52,6 +52,36 @@ module.exports = function(router) {
     router.use(express.json());
 
     // Admin
+    // Award points to users who submitted to box
+    router.post('/awardSubmittedPoints', permissions.isAdmin, function(req, res){
+        SubmissionsController.awardAllSubmitted(req.userExecute, req.body.submissionBoxID, req.body.amount, req.body.notes, logger.defaultResponse(req, res))
+    })
+
+    // Admin
+    // Set order cancelled
+    router.post('/setOrderCancelled', permissions.isAdmin, function(req, res) {
+        OrderController.cancelOrder(req.userExecute, req.body.orderID, logger.defaultResponse(req, res));
+    })
+
+    // Admin
+    // Set order fulfilled
+    router.post('/setOrderFulfilled', permissions.isAdmin, function(req, res) {
+        OrderController.fulfillOrder(req.userExecute, req.body.orderID, logger.defaultResponse(req, res));
+    })
+
+    // Admin
+    // Get item details
+    router.get('/getItemInfo', permissions.isAdmin, function(req, res) {
+        ShopItemController.getItem(req.query.itemID, logger.defaultResponse(req, res));
+    })
+
+    // Admin
+    // Get orders of item
+    router.get('/getOrdersOfItem', permissions.isAdmin, function(req, res) {
+        OrderController.getOrdersOfItem(req.query.itemID, logger.defaultResponse(req, res));
+    })
+
+    // Admin
     // Get submission box submissions
     router.get('/getSubmissionBoxSubmissions', permissions.isAdmin, function(req, res) {
         SubmissionsController.getSubmissionBoxSubmissions(req.query.submissionBoxID, logger.defaultResponse(req, res));
