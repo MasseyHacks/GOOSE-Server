@@ -3,6 +3,8 @@ const User     = require('../models/User');
 const Settings = require('../models/Settings');
 const fs       = require('fs');
 const logger   = require('../services/logger');
+const simpleStatistics = require('simple-statistics')
+const FastStats = require('fast-stats').Stats;
 
 // In memory stats.
 var stats = {};
@@ -76,7 +78,7 @@ function calculateStats(callback) {
                 'L': 0,
                 'XL':0,
             },
-            dietaryRestrictions: {}
+            dietaryRestrictions: {},
         },
 
         verified: 0,
@@ -94,7 +96,17 @@ function calculateStats(callback) {
         dietaryRestrictions: {},
 
         tabs: 0,
-        spaces: 0
+        spaces: 0,
+
+        points: {
+            mean: 0,
+            median: 0,
+            mode: 0,
+            stddev: 0,
+            p25: 0,
+            p75: 0,
+            p99:0,
+        }
 
     };
 
@@ -112,7 +124,7 @@ function calculateStats(callback) {
 
         });
 
-            User
+    User
         .find({'permissions.reviewer':true})
         .exec(function(err, adminUsers) {
             if (err || !adminUsers) {
@@ -123,6 +135,8 @@ function calculateStats(callback) {
                 newStats.votes[adminUsers[i].email] = [adminUsers[i].fullName, 0, 0, 0, adminUsers[i].permissions.developer];
             }
 
+            let pointsArray = []
+            let pointsStats = new FastStats();
 
             User
                 .find({'permissions.checkin': false, 'permissions.admin': false, 'permissions.owner':false})
@@ -270,9 +284,22 @@ function calculateStats(callback) {
 
                         }
 
+                        if (user.status.name === 'checked in') {
+                            let points = user.points.total;
+                            pointsArray.push(points)
+                            pointsStats.push(points)
+                        }
 
                         callback(); // let async know we've finished
                     }, function() {
+
+                        newStats.points.mean = pointsStats.amean();
+                        newStats.points.median = pointsStats.median();
+                        newStats.points.mode = simpleStatistics.mode(pointsArray);
+                        newStats.points.stddev = pointsStats.stddev()
+                        newStats.points.p25 = pointsStats.percentile(25);
+                        newStats.points.p75 = pointsStats.percentile(75);
+                        newStats.points.p99 = pointsStats.percentile(99);
 
                         newStats.avgCharLength = charLength.reduce(function(a, b) {return a + b}, 0) / charLength.length
 
