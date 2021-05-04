@@ -338,6 +338,29 @@ function calculateStats(callback) {
 
 var Stats = {};
 
+Stats.getLeaderboard = async (count) => {
+    let docs = await User.find({'permissions.checkin': false, 'permissions.admin': false, 'permissions.owner':false});
+
+    docs = docs.map(o => {
+        return {
+            fullName: o.fullName,
+            userId: o.id,
+            points: o.points.total
+        }
+    })
+
+    docs.sort((a, b) => {
+        return b.points - a.points;
+    })
+
+    if (!count) {
+        return docs;
+    } else {
+        return docs.slice(0,count);
+    }
+}
+
+
 Stats.refreshStats = function(callback) {
     calculateStats(function(stats) {
         return callback(null, stats);

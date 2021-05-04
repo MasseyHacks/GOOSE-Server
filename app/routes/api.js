@@ -380,6 +380,12 @@ module.exports = function(router) {
         logger.defaultResponse(req, res)(null, stats.getStats())
     });
 
+    // Admin
+    // View leaderboard stats
+    router.get('/points_leaderboard', permissions.isAdmin, async function (req, res) {
+        logger.defaultResponse(req, res)(null, await stats.getLeaderboard(req.query.num))
+    })
+
     // Owner
     // Get schools pending approval
     router.get('/pendingSchools', permissions.isOwner, function (req, res) {
