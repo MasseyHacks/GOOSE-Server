@@ -106,6 +106,7 @@ function calculateStats(callback) {
             p25: 0,
             p75: 0,
             p99:0,
+            total: 0,
         }
 
     };
@@ -300,6 +301,7 @@ function calculateStats(callback) {
                         newStats.points.p25 = pointsStats.percentile(25);
                         newStats.points.p75 = pointsStats.percentile(75);
                         newStats.points.p99 = pointsStats.percentile(99);
+                        newStats.points.total = simpleStatistics.sum(pointsArray);
 
                         newStats.avgCharLength = charLength.reduce(function(a, b) {return a + b}, 0) / charLength.length
 
