@@ -3,6 +3,8 @@ const logger = require('../services/logger');
 const SubmissionBox = require('../models/SubmissionBox');
 const Submission = require('../models/Submission');
 
+const User = require('../models/User');
+
 const SubmissionsController = {};
 
 SubmissionsController.createSubmissionBox = function (name, description, openDate, closeDate, callback){
@@ -99,10 +101,24 @@ SubmissionsController.createSubmission = function (userID, submissionBoxID, file
                     files: files
                 }, function (err, submission) {
                     if (err) {
-                        logger.defaultLogger.error('Error creating submission.. ', err);
+                        logger.defaultLogger.error('Error creating submission.', err);
                         return callback(err);
                     }
-                    return callback(null, submission);
+
+                    SubmissionBox.findOneAndUpdate({
+                        _id: submissionBoxID
+                    }, {
+                        $push: {
+                            submissions: submission._id
+                        }
+                    }, function(err) {
+                        if (err) {
+                            logger.defaultLogger.error('Error updating submission box with submission.', err);
+                            return callback(err);
+                        }
+                        return callback(null, submission);
+                    })
+
                 })
             }
         }
@@ -157,6 +173,38 @@ SubmissionsController.getSubmissionBoxes = function(callback){
             return callback(err);
         }
         return callback(null, submissionBoxes);
+    })
+}
+
+SubmissionsController.awardAllSubmitted = function(adminUser, submissionBoxID, amount, notes, callback) {
+    if(!adminUser || !submissionBoxID || amount === null || isNaN(amount) || (amount * 10)%10 !== 0 || !notes){
+        return callback({error: "Invalid arguments.", clean: true, code: 400})
+    }
+    Submission.find({
+        submissionBoxID: submissionBoxID
+    }, function(err, submissions) {
+        if(err){
+            logger.defaultLogger.error(`Unable to fetch submissions for box ${submissionBoxID}.`, err);
+            return callback(err);
+        }
+
+        logger.logAction(adminUser._id, -1, "Awarded points to users who submitted.", `Submission box: ${submissionBoxID} Points: ${amount} Notes: ${notes}`);
+
+        const uniqueUsers = new Set();
+
+        for(const submission of submissions){
+            if(!uniqueUsers.has(submission.userID)){
+                User.addPoints(adminUser, submission.userID, amount, notes, function(err, msg) {
+                    if(err){
+                        logger.defaultLogger.error(`Error adding points to user ${submission.userID} while attempting to add points to users who submitted to box ${submissionBoxID}. `, err);
+                        return;
+                    }
+                    logger.logAction(adminUser._id, submission.userID, "Added points to user.", `Submitted to box: ${submissionBoxID} Points: ${amount} Notes: ${notes}`);
+                });
+            }
+            uniqueUsers.add(submission.userID);
+        }
+        return callback(null, "Event registered users awarding queued.");
     })
 }
 

@@ -70,4 +70,17 @@ ShopItemController.getItems = function(userExecute, callback){
     })
 }
 
+ShopItemController.getItem = function(itemID, callback) {
+    ShopItem.findOne({
+        _id: itemID
+    }, function(err, shopItem) {
+        if(err || !shopItem) {
+            logger.defaultLogger.error(`Error getting details for item ${itemID}. `, err);
+            return callback(err);
+        }
+
+        return callback(null, shopItem)
+    })
+}
+
 module.exports = ShopItemController;
