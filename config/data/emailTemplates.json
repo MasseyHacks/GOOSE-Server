@@ -44,13 +44,13 @@
   "laggerconfirmemails":{
     "queueName":"laggerConfirmEmails",
     "templateLocation":"./app/templates/email-lagger-confirmation/html.hbs",
-    "emailTitle":"[Reminder] You haven't confirmed your invitation to the 7WC and MasseyHacks!",
+    "emailTitle":"[FINAL Reminder] You haven't confirmed your invitation to the 7WC and MasseyHacks!",
     "canQueue":true
   },
   "laggerwaiveremails":{
   "queueName":"laggerWaiverEmails",
   "templateLocation":"./app/templates/email-lagger-waiver/html.hbs",
-  "emailTitle":"[Reminder] You haven't joined the 7WC & MasseyHacks Discord!",
+  "emailTitle":"[FINAL Reminder] You haven't joined the 7WC & MasseyHacks Discord!",
   "canQueue":true
   },
   "passwordchangedemails":{
